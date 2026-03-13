@@ -47,6 +47,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Escalating Atmosphere Text**: room descriptions react to both stage and pressure level.
 - **Intercom Intrusions**: pressure and late loops trigger boss voice interruptions with personalized taunts.
 - **Branching End States**: true Saturday escape, corporate "promotion" trap ending, and overload collapse failure.
+- **Adaptive Loop Duration**: rising pressure shortens the loop timer, increasing urgency and route planning demands.
 
 ### Controls (DefaultInput.ini)
 

@@ -111,6 +111,8 @@ public:
     virtual void BeginPlay() override;
 
     FString GetClockText() const;
+    int32 GetEffectiveLoopDuration() const;
+    int32 GetSecondsRemaining() const;
     int32 GetCurrentLoop() const { return CurrentLoop; }
     int32 GetResolvedAnomalies() const { return ResolvedAnomalies; }
     int32 GetRequiredAnomalies() const { return RequiredAnomalies; }

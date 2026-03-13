@@ -380,6 +380,7 @@ bool AGlitch459PMGameMode::TryUnlockShortcut(const FName& ShortcutId, const FStr
 
 void AGlitch459PMGameMode::HandleIntercomWhisper()
 {
+    const int32 EffectiveDuration = GetEffectiveLoopDuration();
     const bool bShouldRunIntercom = CurrentLoop >= 8 || PressureLevel >= 3;
     if (!bShouldRunIntercom || CurrentSecond < NextIntercomSecond)
     {
@@ -414,7 +415,7 @@ void AGlitch459PMGameMode::HandleIntercomWhisper()
     AddLog(FString::Printf(TEXT("INTERCOM: %s"), *IntercomLines[NewLineIndex]));
 
     const int32 NextGap = 10 + FMath::RandRange(0, 8);
-    NextIntercomSecond = FMath::Min(CurrentSecond + NextGap, LoopDurationSeconds - 2);
+    NextIntercomSecond = FMath::Min(CurrentSecond + NextGap, EffectiveDuration - 2);
 }
 
 void AGlitch459PMGameMode::TickLoopSecond()
@@ -427,7 +428,7 @@ void AGlitch459PMGameMode::TickLoopSecond()
     ++CurrentSecond;
     HandleIntercomWhisper();
 
-    if (CurrentSecond >= LoopDurationSeconds)
+    if (CurrentSecond >= GetEffectiveLoopDuration())
     {
         ResetLoop();
     }
@@ -463,7 +464,7 @@ void AGlitch459PMGameMode::ResetLoop()
     SelectedExitIndex = 0;
     bAnomalyFlaggedThisLoop = false;
     bIntercomActiveThisLoop = false;
-    NextIntercomSecond = 18 + FMath::RandRange(0, 8);
+    NextIntercomSecond = FMath::Min(18 + FMath::RandRange(0, 8), GetEffectiveLoopDuration() - 2);
 
     PickNextAnomaly();
     BuildLoopTasks();
@@ -476,6 +477,16 @@ void AGlitch459PMGameMode::ResetLoop()
 FString AGlitch459PMGameMode::GetClockText() const
 {
     return FString::Printf(TEXT("4:59:%02d PM"), CurrentSecond);
+}
+
+int32 AGlitch459PMGameMode::GetEffectiveLoopDuration() const
+{
+    return FMath::Clamp(LoopDurationSeconds - (PressureLevel * 4), 36, LoopDurationSeconds);
+}
+
+int32 AGlitch459PMGameMode::GetSecondsRemaining() const
+{
+    return FMath::Max(GetEffectiveLoopDuration() - CurrentSecond, 0);
 }
 
 FString AGlitch459PMGameMode::GetNarrativeStageLabel() const

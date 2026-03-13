@@ -41,11 +41,12 @@ void AGlitch459PMHUD::DrawHUD()
 
     DrawText(
         FString::Printf(
-            TEXT("Stage: %s    Tasks: %d    Shortcuts: %d    Pressure: %d/5"),
+            TEXT("Stage: %s    Tasks: %d    Shortcuts: %d    Pressure: %d/5    Time Left: %ds"),
             *GameMode->GetNarrativeStageLabel(),
             GameMode->GetCompletedTaskCount(),
             GameMode->GetDiscoveredShortcutCount(),
-            GameMode->GetPressureLevel()
+            GameMode->GetPressureLevel(),
+            GameMode->GetSecondsRemaining()
         ),
         FLinearColor(0.9f, 0.78f, 0.74f),
         X,
