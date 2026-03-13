@@ -24,6 +24,8 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 
 If you press Play in an otherwise empty map, the prototype now spawns a fallback office shell, light, and status terminal automatically so the game remains testable without authored level content.
 
+If PIE still opens into an empty template world, check that the project is using `Glitch459PMGameMode` in Project Settings > Maps & Modes. The runtime office shell only appears when the custom game mode is active.
+
 ### Gameplay Loop
 
 - Time starts at `4:57:00 PM` and advances each second.
