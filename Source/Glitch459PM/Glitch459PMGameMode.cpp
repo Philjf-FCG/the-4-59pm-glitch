@@ -26,6 +26,7 @@ void AGlitch459PMGameMode::BeginPlay()
     PickNextAnomaly();
     GeneratePremonition();
     BuildLoopTasks();
+    GenerateDirective();
 
     AddLog(TEXT("Arthur, final reminder: finish the Final Friday Report before 5:00 PM to secure your promotion."));
 
@@ -293,6 +294,25 @@ void AGlitch459PMGameMode::EvaluateLoopPressure()
     }
 }
 
+void AGlitch459PMGameMode::EvaluateDirectiveOutcome()
+{
+    if (CurrentDirectiveType == ELoopDirectiveType::None)
+    {
+        return;
+    }
+
+    if (bDirectiveCompletedThisLoop)
+    {
+        ++ComplianceScore;
+        PressureLevel = FMath::Max(PressureLevel - 1, 0);
+        AddLog(TEXT("Directive satisfied. The building loosens its grip for a moment."));
+        return;
+    }
+
+    PressureLevel = FMath::Min(PressureLevel + 1, 5);
+    AddLog(TEXT("Directive missed. Somewhere, a manager makes a note."));
+}
+
 void AGlitch459PMGameMode::AddLog(const FString& Message)
 {
     LogLines.Insert(Message, 0);
@@ -538,6 +558,42 @@ void AGlitch459PMGameMode::GeneratePremonition()
     AddLog(TEXT("Your premonition arrives scrambled by panic."));
 }
 
+void AGlitch459PMGameMode::GenerateDirective()
+{
+    CurrentDirectiveType = ELoopDirectiveType::None;
+    DirectiveTargetRoom = NAME_None;
+    DirectiveTargetObject = NAME_None;
+    CurrentDirectiveText = TEXT("Directive: survive the loop.");
+    bDirectiveCompletedThisLoop = false;
+
+    const FGlitchTask* PrimaryTask = CurrentLoopTasks.Num() > 0 ? &CurrentLoopTasks[0] : nullptr;
+    if (CurrentLoop >= 8 && PrimaryTask && (CurrentLoop % 3 == 0))
+    {
+        CurrentDirectiveType = ELoopDirectiveType::InspectObject;
+        DirectiveTargetRoom = PrimaryTask->RequiredRoom;
+        DirectiveTargetObject = PrimaryTask->RequiredObject;
+        CurrentDirectiveText = FString::Printf(TEXT("Directive: inspect %s in %s."), *BuildObjectDisplayName(DirectiveTargetObject), *DirectiveTargetRoom.ToString().Replace(TEXT("_"), TEXT(" ")));
+    }
+    else if (CurrentLoop >= 5 && PrimaryTask && (CurrentLoop % 2 == 0))
+    {
+        CurrentDirectiveType = ELoopDirectiveType::ReachRoom;
+        DirectiveTargetRoom = PrimaryTask->RequiredRoom;
+        CurrentDirectiveText = FString::Printf(TEXT("Directive: report in person to %s."), *DirectiveTargetRoom.ToString().Replace(TEXT("_"), TEXT(" ")));
+    }
+    else if (CurrentLoop >= 3)
+    {
+        CurrentDirectiveType = ELoopDirectiveType::StabilizeAnomaly;
+        CurrentDirectiveText = TEXT("Directive: stabilize this loop's anomaly before 5:00 PM.");
+    }
+    else if (PrimaryTask)
+    {
+        CurrentDirectiveType = ELoopDirectiveType::CompleteTask;
+        CurrentDirectiveText = TEXT("Directive: complete your assigned report task.");
+    }
+
+    AddLog(CurrentDirectiveText);
+}
+
 void AGlitch459PMGameMode::TickLoopSecond()
 {
     if (HasEnded())
@@ -556,6 +612,7 @@ void AGlitch459PMGameMode::TickLoopSecond()
 
 void AGlitch459PMGameMode::ResetLoop()
 {
+    EvaluateDirectiveOutcome();
     EvaluateLoopPressure();
 
     if (PressureLevel >= 5)
@@ -583,12 +640,14 @@ void AGlitch459PMGameMode::ResetLoop()
     SelectedObjectIndex = 0;
     SelectedExitIndex = 0;
     bAnomalyFlaggedThisLoop = false;
+    bDirectiveCompletedThisLoop = false;
     bIntercomActiveThisLoop = false;
     NextIntercomSecond = FMath::Min(18 + FMath::RandRange(0, 8), GetEffectiveLoopDuration() - 2);
 
     PickNextAnomaly();
     GeneratePremonition();
     BuildLoopTasks();
+    GenerateDirective();
     ApplyNarrativeBeatForLoop();
 
     LastInspectionText = TEXT("The second hand slips past 4:59:59. You blink, and the office resets to 4:57:00 PM.");
@@ -690,6 +749,7 @@ FString AGlitch459PMGameMode::GetTerminalStatusText() const
     const FString OutcomeHint = CollectedFragments.Num() >= RequiredFragments
         ? TEXT("MEMORY RESTORED")
         : TEXT("MEMORY INCOMPLETE");
+    const FString TerminalFooter = CurrentDirectiveText + TEXT("\n") + OutcomeHint;
 
     return FString::Printf(
         TEXT("FINAL FRIDAY REPORT TERMINAL\nTIME %s\nLOOP %d\nPRESSURE %d/5\nANOMALIES %d/%d\nFRAGMENTS %d/%d\nINTERCOM %s\n%s\n%s"),
@@ -702,7 +762,7 @@ FString AGlitch459PMGameMode::GetTerminalStatusText() const
         RequiredFragments,
         *IntercomState,
         *TaskLine,
-        *OutcomeHint
+        *TerminalFooter
     );
 }
 
@@ -825,6 +885,14 @@ FString AGlitch459PMGameMode::GetSelectedObjectDescriptionAndClue()
     }
 
     LastInspectionText = Description;
+
+    if (CurrentDirectiveType == ELoopDirectiveType::InspectObject
+        && CurrentRoomId == DirectiveTargetRoom
+        && ObjectId == DirectiveTargetObject)
+    {
+        bDirectiveCompletedThisLoop = true;
+    }
+
     return LastInspectionText;
 }
 
@@ -908,6 +976,10 @@ bool AGlitch459PMGameMode::TryFlagSelectedObject()
     if (IsSelectedObjectAnomaly())
     {
         bAnomalyFlaggedThisLoop = true;
+        if (CurrentDirectiveType == ELoopDirectiveType::StabilizeAnomaly)
+        {
+            bDirectiveCompletedThisLoop = true;
+        }
         ResolvedAnomalies = FMath::Min(ResolvedAnomalies + 1, RequiredAnomalies);
         AddLog(TEXT("Anomaly flagged. Reality steadies for exactly one breath."));
 
@@ -951,6 +1023,10 @@ bool AGlitch459PMGameMode::TryCompleteSelectedTask()
     if (Task->RequiredRoom == CurrentRoomId && Task->RequiredObject == SelectedObjectId)
     {
         Task->bCompleted = true;
+        if (CurrentDirectiveType == ELoopDirectiveType::CompleteTask)
+        {
+            bDirectiveCompletedThisLoop = true;
+        }
         ++CompletedTaskCount;
         AddLog(Task->CompletionText);
         return true;
@@ -1021,6 +1097,10 @@ bool AGlitch459PMGameMode::TryUseSelectedExit()
     }
 
     CurrentRoomId = Exit.TargetRoom;
+    if (CurrentDirectiveType == ELoopDirectiveType::ReachRoom && CurrentRoomId == DirectiveTargetRoom)
+    {
+        bDirectiveCompletedThisLoop = true;
+    }
     SelectedObjectIndex = 0;
     SelectedExitIndex = 0;
     AddLog(FString::Printf(TEXT("You move to %s."), *GetCurrentRoomName()));

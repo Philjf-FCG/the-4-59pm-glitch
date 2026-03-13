@@ -41,9 +41,10 @@ void AGlitch459PMHUD::DrawHUD()
 
     DrawText(
         FString::Printf(
-            TEXT("Stage: %s    Tasks: %d    Shortcuts: %d    Fragments: %d/%d    Pressure: %d/5    Time Left: %ds"),
+            TEXT("Stage: %s    Tasks: %d    Compliance: %d    Shortcuts: %d    Fragments: %d/%d    Pressure: %d/5    Time Left: %ds"),
             *GameMode->GetNarrativeStageLabel(),
             GameMode->GetCompletedTaskCount(),
+            GameMode->GetComplianceScore(),
             GameMode->GetDiscoveredShortcutCount(),
             GameMode->GetCollectedFragmentCount(),
             GameMode->GetRequiredFragmentCount(),
@@ -71,6 +72,16 @@ void AGlitch459PMHUD::DrawHUD()
     DrawText(
         GameMode->GetCurrentPremonition(),
         FLinearColor(0.86f, 0.82f, 0.98f),
+        X,
+        Y,
+        Font,
+        0.95f
+    );
+    Y += 24.0f;
+
+    DrawText(
+        GameMode->GetCurrentDirective(),
+        FLinearColor(0.92f, 0.86f, 0.7f),
         X,
         Y,
         Font,

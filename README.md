@@ -54,6 +54,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Premonitions**: each loop starts with a hint about reality drift; low pressure gives reliable clues, high pressure corrupts them.
 - **Anomaly Report Risk**: false reports immediately raise pressure while correct reports can calm it.
 - **Diegetic Status Terminal**: a placeable actor can mirror loop status, tasks, anomaly count, and restored-memory state directly in the world.
+- **Compliance Directives**: each loop can issue a specific order like reaching a room, inspecting an object, or stabilizing the anomaly; obeying it reduces pressure, ignoring it adds risk.
 
 ### Controls (DefaultInput.ini)
 

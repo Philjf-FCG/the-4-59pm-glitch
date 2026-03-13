@@ -4,6 +4,15 @@
 #include "GameFramework/GameModeBase.h"
 #include "Glitch459PMGameMode.generated.h"
 
+enum class ELoopDirectiveType : uint8
+{
+    None,
+    CompleteTask,
+    StabilizeAnomaly,
+    ReachRoom,
+    InspectObject
+};
+
 USTRUCT()
 struct FGlitchExit
 {
@@ -132,12 +141,14 @@ public:
 
     FString GetNarrativeStageLabel() const;
     int32 GetPressureLevel() const { return PressureLevel; }
+    int32 GetComplianceScore() const { return ComplianceScore; }
     int32 GetDiscoveredShortcutCount() const { return DiscoveredShortcuts.Num(); }
     int32 GetCompletedTaskCount() const { return CompletedTaskCount; }
     int32 GetCollectedFragmentCount() const { return CollectedFragments.Num(); }
     int32 GetRequiredFragmentCount() const { return RequiredFragments; }
     bool IsIntercomActiveThisLoop() const { return bIntercomActiveThisLoop; }
     FString GetCurrentPremonition() const { return CurrentPremonition; }
+    FString GetCurrentDirective() const { return CurrentDirectiveText; }
     FString GetSelectedTaskPrompt() const;
     bool IsSelectedTaskCompleted() const;
 
@@ -162,7 +173,9 @@ private:
     void BuildLoopTasks();
     void ApplyNarrativeBeatForLoop();
     void EvaluateLoopPressure();
+    void EvaluateDirectiveOutcome();
     void HandleIntercomWhisper();
+    void GenerateDirective();
     void GeneratePremonition();
     void AddLog(const FString& Message);
     void PickNextAnomaly();
@@ -228,6 +241,9 @@ private:
     UPROPERTY()
     int32 PressureLevel = 0;
 
+    UPROPERTY()
+    int32 ComplianceScore = 0;
+
     UPROPERTY(EditDefaultsOnly)
     int32 RequiredAnomalies = 5;
 
@@ -284,6 +300,16 @@ private:
 
     UPROPERTY()
     FString CurrentPremonition;
+
+    ELoopDirectiveType CurrentDirectiveType = ELoopDirectiveType::None;
+    FName DirectiveTargetRoom;
+    FName DirectiveTargetObject;
+
+    UPROPERTY()
+    FString CurrentDirectiveText;
+
+    UPROPERTY()
+    bool bDirectiveCompletedThisLoop = false;
 
     FTimerHandle LoopTimerHandle;
 };
