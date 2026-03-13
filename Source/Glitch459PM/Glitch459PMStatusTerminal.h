@@ -22,10 +22,22 @@ private:
     class USceneComponent* SceneRoot;
 
     UPROPERTY(VisibleAnywhere)
+    class UStaticMeshComponent* TerminalPedestal;
+
+    UPROPERTY(VisibleAnywhere)
     class UStaticMeshComponent* TerminalBody;
 
     UPROPERTY(VisibleAnywhere)
+    class UStaticMeshComponent* TerminalScreen;
+
+    UPROPERTY(VisibleAnywhere)
+    class UStaticMeshComponent* TerminalKeyboard;
+
+    UPROPERTY(VisibleAnywhere)
     class UTextRenderComponent* ScreenText;
+
+    UPROPERTY(VisibleAnywhere)
+    class UAudioComponent* TerminalAudio;
 
     UPROPERTY(EditAnywhere, Category = "Terminal")
     float RefreshInterval = 0.25f;

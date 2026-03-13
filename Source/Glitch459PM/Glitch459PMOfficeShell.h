@@ -43,5 +43,8 @@ private:
     UPROPERTY(VisibleAnywhere)
     class UPointLightComponent* OverheadLight;
 
+    UPROPERTY(VisibleAnywhere)
+    class UAudioComponent* RoomAudio;
+
     void ConfigureSurface(class UStaticMeshComponent* MeshComponent, const FVector& RelativeLocation, const FVector& RelativeScale, const FRotator& RelativeRotation = FRotator::ZeroRotator) const;
 };

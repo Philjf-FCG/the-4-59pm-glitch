@@ -1,9 +1,12 @@
 #include "Glitch459PMOfficeShell.h"
 
+#include "Components/AudioComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Materials/MaterialInterface.h"
+#include "Sound/SoundBase.h"
 #include "UObject/ConstructorHelpers.h"
 
 AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
@@ -14,6 +17,9 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     SetRootComponent(SceneRoot);
 
     static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterial(TEXT("/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> FloorMaterial(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+    static ConstructorHelpers::FObjectFinder<USoundBase> AmbientSound(TEXT("/Engine/EditorSounds/Notifications/CompileStart_Cue.CompileStart_Cue"));
 
     Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Floor"));
     Floor->SetupAttachment(SceneRoot);
@@ -42,6 +48,12 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     OverheadLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("OverheadLight"));
     OverheadLight->SetupAttachment(SceneRoot);
 
+    RoomAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("RoomAudio"));
+    RoomAudio->SetupAttachment(SceneRoot);
+    RoomAudio->bAutoActivate = true;
+    RoomAudio->SetVolumeMultiplier(0.28f);
+    RoomAudio->SetPitchMultiplier(0.6f);
+
     if (CubeMesh.Succeeded())
     {
         Floor->SetStaticMesh(CubeMesh.Object);
@@ -51,6 +63,26 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
         EastWall->SetStaticMesh(CubeMesh.Object);
         WestWall->SetStaticMesh(CubeMesh.Object);
         Desk->SetStaticMesh(CubeMesh.Object);
+    }
+
+    if (WallMaterial.Succeeded())
+    {
+        NorthWall->SetMaterial(0, WallMaterial.Object);
+        SouthWall->SetMaterial(0, WallMaterial.Object);
+        EastWall->SetMaterial(0, WallMaterial.Object);
+        WestWall->SetMaterial(0, WallMaterial.Object);
+        Ceiling->SetMaterial(0, WallMaterial.Object);
+    }
+
+    if (FloorMaterial.Succeeded())
+    {
+        Floor->SetMaterial(0, FloorMaterial.Object);
+        Desk->SetMaterial(0, FloorMaterial.Object);
+    }
+
+    if (AmbientSound.Succeeded())
+    {
+        RoomAudio->SetSound(AmbientSound.Object);
     }
 
     ConfigureSurface(Floor, FVector(0.0f, 0.0f, -10.0f), FVector(12.0f, 12.0f, 0.2f));
@@ -72,6 +104,8 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     OverheadLight->SetIntensity(12000.0f);
     OverheadLight->SetLightColor(FColor(255, 244, 214));
     OverheadLight->AttenuationRadius = 2600.0f;
+
+    RoomAudio->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 }
 
 void AGlitch459PMOfficeShell::ConfigureSurface(UStaticMeshComponent* MeshComponent, const FVector& RelativeLocation, const FVector& RelativeScale, const FRotator& RelativeRotation) const
