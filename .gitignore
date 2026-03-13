@@ -1,0 +1,34 @@
+# Unreal Engine generated folders
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Visual Studio
+.vs/
+*.VC.db
+*.VC.opendb
+*.suo
+*.opensdf
+*.sdf
+
+# Build artifacts
+*.pdb
+*.obj
+*.ilk
+*.exp
+*.lib
+*.dll
+*.exe
+
+# Unreal generated project files
+*.xcodeproj
+*.xcworkspace
+*.sln.DotSettings.user
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Optional local environment files
+*.env
