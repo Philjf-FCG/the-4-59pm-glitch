@@ -55,10 +55,10 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
 
     ConfigureSurface(Floor, FVector(0.0f, 0.0f, -10.0f), FVector(12.0f, 12.0f, 0.2f));
     ConfigureSurface(Ceiling, FVector(0.0f, 0.0f, 420.0f), FVector(12.0f, 12.0f, 0.2f));
-    ConfigureSurface(NorthWall, FVector(0.0f, 1200.0f, 200.0f), FVector(12.0f, 0.2f, 4.2f));
-    ConfigureSurface(SouthWall, FVector(0.0f, -1200.0f, 200.0f), FVector(12.0f, 0.2f, 4.2f));
-    ConfigureSurface(EastWall, FVector(1200.0f, 0.0f, 200.0f), FVector(0.2f, 12.0f, 4.2f));
-    ConfigureSurface(WestWall, FVector(-1200.0f, 0.0f, 200.0f), FVector(0.2f, 12.0f, 4.2f));
+    ConfigureSurface(NorthWall, FVector(0.0f, 600.0f, 200.0f), FVector(12.0f, 0.2f, 4.2f));
+    ConfigureSurface(SouthWall, FVector(0.0f, -600.0f, 200.0f), FVector(12.0f, 0.2f, 4.2f));
+    ConfigureSurface(EastWall, FVector(600.0f, 0.0f, 200.0f), FVector(0.2f, 12.0f, 4.2f));
+    ConfigureSurface(WestWall, FVector(-600.0f, 0.0f, 200.0f), FVector(0.2f, 12.0f, 4.2f));
     ConfigureSurface(Desk, FVector(280.0f, 0.0f, 42.0f), FVector(1.8f, 0.9f, 0.5f));
 
     RoomLabel->SetRelativeLocation(FVector(280.0f, -180.0f, 110.0f));
