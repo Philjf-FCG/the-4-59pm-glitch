@@ -192,6 +192,7 @@ private:
     bool TryCollectFragment(const FName& FragmentId, const FString& DiscoveryMessage);
 
     FString BuildObjectDisplayName(const FName& ObjectId) const;
+    FString BuildRoomDistortionText(const FName& RoomId) const;
 
     UPROPERTY()
     TMap<FName, FGlitchRoom> Rooms;

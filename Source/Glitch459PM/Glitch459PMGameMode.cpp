@@ -456,6 +456,65 @@ FString AGlitch459PMGameMode::BuildObjectDisplayName(const FName& ObjectId) cons
     return ObjectId.ToString().Replace(TEXT("_"), TEXT(" "));
 }
 
+FString AGlitch459PMGameMode::BuildRoomDistortionText(const FName& RoomId) const
+{
+    if (PressureLevel <= 1 && CurrentLoop <= 6)
+    {
+        return TEXT("");
+    }
+
+    if (RoomId == TEXT("breakroom"))
+    {
+        return PressureLevel >= 4
+            ? TEXT(" The microwave ticks back at you like a second clock buried in the wall.")
+            : TEXT(" The coffee smell thickens until it feels chewable.");
+    }
+
+    if (RoomId == TEXT("hallway"))
+    {
+        return PressureLevel >= 4
+            ? TEXT(" The far end of the corridor keeps retreating as if the building is inhaling.")
+            : TEXT(" The framed slogans seem to swap places when you look down.");
+    }
+
+    if (RoomId == TEXT("cubicles"))
+    {
+        return PressureLevel >= 4
+            ? TEXT(" Monitor glow pulses in sync with a panic you don't remember choosing.")
+            : TEXT(" A few cubicles stay occupied only when you are not staring directly at them.");
+    }
+
+    if (RoomId == TEXT("lobby"))
+    {
+        return PressureLevel >= 4
+            ? TEXT(" Sunset presses against the glass like something trying to get inside.")
+            : TEXT(" The front doors reflect rooms that are nowhere near the lobby.");
+    }
+
+    if (RoomId == TEXT("server_room"))
+    {
+        return PressureLevel >= 4
+            ? TEXT(" Cooling fans chant your employee number under the white noise.")
+            : TEXT(" The rack lights blink in patterns that look almost conversational.");
+    }
+
+    if (RoomId == TEXT("ceo_office"))
+    {
+        return PressureLevel >= 4
+            ? TEXT(" The skyline outside bends like a printed backdrop left too close to a flame.")
+            : TEXT(" The polished floor briefly shows footsteps that do not belong to you.");
+    }
+
+    if (RoomId == TEXT("archive"))
+    {
+        return PressureLevel >= 4
+            ? TEXT(" Filing drawers inch open like mouths waiting for your badge number.")
+            : TEXT(" The cabinets rustle as if paper inside them is breathing.");
+    }
+
+    return TEXT("");
+}
+
 bool AGlitch459PMGameMode::TryUnlockShortcut(const FName& ShortcutId, const FString& DiscoveryMessage)
 {
     if (ShortcutId.IsNone() || DiscoveredShortcuts.Contains(ShortcutId))
@@ -707,32 +766,34 @@ FString AGlitch459PMGameMode::GetCurrentRoomDescription() const
         return TEXT("Room data missing.");
     }
 
+    const FString Distortion = BuildRoomDistortionText(CurrentRoomId);
+
     if (CurrentLoop <= 10)
     {
         if (PressureLevel == 0)
         {
-            return Room->Description;
+            return Room->Description + Distortion;
         }
 
-        return Room->Description + TEXT(" You feel watched by deadlines you missed.");
+        return Room->Description + TEXT(" You feel watched by deadlines you missed.") + Distortion;
     }
 
     if (CurrentLoop <= 13)
     {
         if (PressureLevel >= 4)
         {
-            return Room->Description + TEXT(" Distances shift and your heartbeat drowns the lights.");
+            return Room->Description + TEXT(" Distances shift and your heartbeat drowns the lights.") + Distortion;
         }
 
-        return Room->Description + TEXT(" Distances shift when you stop looking directly at them.");
+        return Room->Description + TEXT(" Distances shift when you stop looking directly at them.") + Distortion;
     }
 
     if (PressureLevel >= 4)
     {
-        return Room->Description + TEXT(" The place feels less like architecture and more like a sentence being shouted." );
+        return Room->Description + TEXT(" The place feels less like architecture and more like a sentence being shouted.") + Distortion;
     }
 
-    return Room->Description + TEXT(" The place feels less like architecture and more like a sentence.");
+    return Room->Description + TEXT(" The place feels less like architecture and more like a sentence.") + Distortion;
 }
 
 FString AGlitch459PMGameMode::GetTerminalStatusText() const
