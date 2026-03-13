@@ -447,6 +447,24 @@ bool AGlitch459PMGameMode::TryUnlockShortcut(const FName& ShortcutId, const FStr
     return true;
 }
 
+bool AGlitch459PMGameMode::TryCollectFragment(const FName& FragmentId, const FString& DiscoveryMessage)
+{
+    if (FragmentId.IsNone() || CollectedFragments.Contains(FragmentId))
+    {
+        return false;
+    }
+
+    CollectedFragments.Add(FragmentId);
+    AddLog(DiscoveryMessage);
+
+    if (CollectedFragments.Num() >= RequiredFragments)
+    {
+        AddLog(TEXT("All memory fragments recovered. You remember why you wanted to leave."));
+    }
+
+    return true;
+}
+
 void AGlitch459PMGameMode::HandleIntercomWhisper()
 {
     const int32 EffectiveDuration = GetEffectiveLoopDuration();
@@ -709,6 +727,30 @@ FString AGlitch459PMGameMode::GetSelectedObjectDescriptionAndClue()
         );
     }
 
+    if (CurrentRoomId == TEXT("breakroom") && ObjectId == TEXT("microwave") && CurrentLoop >= 6)
+    {
+        TryCollectFragment(
+            TEXT("fragment_family_dinner"),
+            TEXT("Memory fragment found: your family waiting at a Saturday dinner table that never included spreadsheets.")
+        );
+    }
+
+    if (CurrentRoomId == TEXT("server_room") && ObjectId == TEXT("backup_tapes") && CurrentLoop >= 10)
+    {
+        TryCollectFragment(
+            TEXT("fragment_resignation"),
+            TEXT("Memory fragment found: a resignation letter you wrote, printed, and never submitted.")
+        );
+    }
+
+    if (CurrentRoomId == TEXT("archive") && ObjectId == TEXT("quit_box") && CurrentLoop >= 12)
+    {
+        TryCollectFragment(
+            TEXT("fragment_weekend"),
+            TEXT("Memory fragment found: sunlight on your apartment floor at 9:00 AM, no alarm, no badge.")
+        );
+    }
+
     LastInspectionText = Description;
     return LastInspectionText;
 }
@@ -854,6 +896,15 @@ bool AGlitch459PMGameMode::TryUseSelectedExit()
 
     if (Exit.bFinalExit)
     {
+        if (ResolvedAnomalies >= RequiredAnomalies && CompletedTaskCount >= 8 && CollectedFragments.Num() >= RequiredFragments)
+        {
+            bGameWon = true;
+            EndingHeadline = TEXT("Wake Up, Arthur");
+            EndingBody = TEXT("You step through the doors into a Saturday that remembers your name. The office does not follow.");
+            AddLog(TEXT("The lobby doors open to a real morning. 4:59 PM finally releases you."));
+            return true;
+        }
+
         if (ResolvedAnomalies >= RequiredAnomalies && CompletedTaskCount >= 8)
         {
             bGameWon = true;

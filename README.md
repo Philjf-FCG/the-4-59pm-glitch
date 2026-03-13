@@ -31,6 +31,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - Complete loop tasks from Arthur's "Final Friday Report" board.
 - Unlock deeper routes (server room, CEO office, Archive) with loop knowledge and completed tasks.
 - Discover hidden shortcuts by inspecting the right objects on later loops.
+- Recover memory fragments from key objects to unlock Arthur's full escape route.
 - Keep momentum each loop or pressure rises and descriptions become more hostile.
 - Escape requires both anomaly mastery and report progress.
 
@@ -49,6 +50,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Branching End States**: true Saturday escape, corporate "promotion" trap ending, and overload collapse failure.
 - **Adaptive Loop Duration**: rising pressure shortens the loop timer, increasing urgency and route planning demands.
 - **Reachability-Safe Task Picks**: loop task generation now favors objectives the player can actually reach in that loop.
+- **Memory Fragments**: inspect late-loop objects to recover Arthur's personal memories and unlock a superior ending path.
 
 ### Controls (DefaultInput.ini)
 

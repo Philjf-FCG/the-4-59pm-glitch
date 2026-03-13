@@ -41,10 +41,12 @@ void AGlitch459PMHUD::DrawHUD()
 
     DrawText(
         FString::Printf(
-            TEXT("Stage: %s    Tasks: %d    Shortcuts: %d    Pressure: %d/5    Time Left: %ds"),
+            TEXT("Stage: %s    Tasks: %d    Shortcuts: %d    Fragments: %d/%d    Pressure: %d/5    Time Left: %ds"),
             *GameMode->GetNarrativeStageLabel(),
             GameMode->GetCompletedTaskCount(),
             GameMode->GetDiscoveredShortcutCount(),
+            GameMode->GetCollectedFragmentCount(),
+            GameMode->GetRequiredFragmentCount(),
             GameMode->GetPressureLevel(),
             GameMode->GetSecondsRemaining()
         ),

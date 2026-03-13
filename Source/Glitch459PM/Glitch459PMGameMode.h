@@ -133,6 +133,8 @@ public:
     int32 GetPressureLevel() const { return PressureLevel; }
     int32 GetDiscoveredShortcutCount() const { return DiscoveredShortcuts.Num(); }
     int32 GetCompletedTaskCount() const { return CompletedTaskCount; }
+    int32 GetCollectedFragmentCount() const { return CollectedFragments.Num(); }
+    int32 GetRequiredFragmentCount() const { return RequiredFragments; }
     bool IsIntercomActiveThisLoop() const { return bIntercomActiveThisLoop; }
     FString GetSelectedTaskPrompt() const;
     bool IsSelectedTaskCompleted() const;
@@ -171,6 +173,7 @@ private:
     bool IsTaskEligibleForCurrentLoop(const FGlitchTask& Task) const;
 
     bool TryUnlockShortcut(const FName& ShortcutId, const FString& DiscoveryMessage);
+    bool TryCollectFragment(const FName& FragmentId, const FString& DiscoveryMessage);
 
     FString BuildObjectDisplayName(const FName& ObjectId) const;
 
@@ -260,6 +263,12 @@ private:
 
     UPROPERTY()
     TSet<FName> DiscoveredShortcuts;
+
+    UPROPERTY()
+    TSet<FName> CollectedFragments;
+
+    UPROPERTY(EditDefaultsOnly)
+    int32 RequiredFragments = 3;
 
     UPROPERTY()
     bool bIntercomActiveThisLoop = false;
