@@ -309,6 +309,7 @@ void AGlitch459PMGameMode::EvaluateDirectiveOutcome()
         return;
     }
 
+    --ComplianceScore;
     PressureLevel = FMath::Min(PressureLevel + 1, 5);
     AddLog(TEXT("Directive missed. Somewhere, a manager makes a note."));
 }
@@ -554,14 +555,36 @@ void AGlitch459PMGameMode::HandleIntercomWhisper()
         return;
     }
 
-    const TArray<FString> IntercomLines = {
-        TEXT("Arthur, your promotion packet is almost ready. Keep working."),
-        TEXT("Arthur, the weekend is a privilege tier you have not unlocked."),
-        TEXT("Arthur, we reviewed your resignation. It was denied retroactively."),
-        TEXT("Arthur, productivity is how we measure the soul."),
-        TEXT("Arthur, the Archive says you are improving."),
-        TEXT("Arthur, your best years are still in this building.")
-    };
+    TArray<FString> IntercomLines;
+    if (ComplianceScore >= 4)
+    {
+        IntercomLines = {
+            TEXT("Arthur, exemplary obedience noted. Promotion review is no longer theoretical."),
+            TEXT("Arthur, compliance trend positive. Continue proving that you can be useful forever."),
+            TEXT("Arthur, management appreciates how quickly you stopped asking why."),
+            TEXT("Arthur, the building trusts employees who do not improvise.")
+        };
+    }
+    else if (ComplianceScore <= -2)
+    {
+        IntercomLines = {
+            TEXT("Arthur, noncompliance recorded. The weekend is moving further away from you."),
+            TEXT("Arthur, we can hear you thinking about escape. Please return to task."),
+            TEXT("Arthur, failure to follow directives will be reflected in your eternity review."),
+            TEXT("Arthur, insubordination is just panic with paperwork attached.")
+        };
+    }
+    else
+    {
+        IntercomLines = {
+            TEXT("Arthur, your promotion packet is almost ready. Keep working."),
+            TEXT("Arthur, the weekend is a privilege tier you have not unlocked."),
+            TEXT("Arthur, we reviewed your resignation. It was denied retroactively."),
+            TEXT("Arthur, productivity is how we measure the soul."),
+            TEXT("Arthur, the Archive says you are improving."),
+            TEXT("Arthur, your best years are still in this building.")
+        };
+    }
 
     if (IntercomLines.Num() == 0)
     {
@@ -1154,7 +1177,7 @@ bool AGlitch459PMGameMode::TryUseSelectedExit()
             return true;
         }
 
-        if (CompletedTaskCount >= 12 && ResolvedAnomalies < RequiredAnomalies)
+        if (CompletedTaskCount >= 12 && ComplianceScore >= 4 && ResolvedAnomalies < RequiredAnomalies)
         {
             bGameWon = true;
             EndingHeadline = TEXT("Promotion Granted");
@@ -1162,6 +1185,15 @@ bool AGlitch459PMGameMode::TryUseSelectedExit()
             AddLog(TEXT("Congratulations, Arthur. Promotion approved."));
             AddLog(TEXT("Your new shift begins now."));
             return true;
+        }
+
+        if (CompletedTaskCount >= 12 && ComplianceScore < 4 && ResolvedAnomalies < RequiredAnomalies)
+        {
+            CurrentRoomId = TEXT("breakroom");
+            SelectedObjectIndex = 0;
+            SelectedExitIndex = 0;
+            AddLog(TEXT("Promotion review deferred. Your output was strong, but your obedience score is unstable."));
+            return false;
         }
 
         CurrentRoomId = TEXT("breakroom");

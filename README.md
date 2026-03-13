@@ -42,9 +42,10 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 3. Use `F` only when you are confident the selected object is the active anomaly. False reports raise pressure immediately.
 4. Use `Z / C` to select a task, move to the required room and object, then press `X` to complete it.
 5. Watch the current directive. Obeying it lowers pressure and improves compliance; missing it makes later loops harsher.
-6. Use exits to unlock deeper routes through the office. Some exits need loop knowledge, completed tasks, or discovered shortcuts.
-7. Review the new loop-review line after every reset. It tells you whether you actually made progress before the clock snapped back.
-8. To reach the best ending, combine anomaly stabilization, task progress, and all memory fragments before taking the lobby exit.
+6. Compliance now matters beyond survival: high obedience changes intercom behavior and is required for the corporate promotion ending.
+7. Use exits to unlock deeper routes through the office. Some exits need loop knowledge, completed tasks, or discovered shortcuts.
+8. Review the new loop-review line after every reset. It tells you whether you actually made progress before the clock snapped back.
+9. To reach the best ending, combine anomaly stabilization, task progress, and all memory fragments before taking the lobby exit.
 
 ### Narrative Structure
 
@@ -66,6 +67,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Anomaly Report Risk**: false reports immediately raise pressure while correct reports can calm it.
 - **Diegetic Status Terminal**: a placeable actor can mirror loop status, tasks, anomaly count, and restored-memory state directly in the world.
 - **Compliance Directives**: each loop can issue a specific order like reaching a room, inspecting an object, or stabilizing the anomaly; obeying it reduces pressure, ignoring it adds risk.
+- **Compliance Consequences**: obedience now changes intercom tone and gates the corporate promotion branch.
 - **Room-Specific Distortion**: pressure no longer escalates with only generic text; each room now mutates in its own way as the office destabilizes.
 - **Loop Review**: every reset now records what you achieved or missed, making failed loops easier to read and correct.
 
