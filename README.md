@@ -30,6 +30,8 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - Correctly flag anomalies to stabilize reality.
 - Complete loop tasks from Arthur's "Final Friday Report" board.
 - Unlock deeper routes (server room, CEO office, Archive) with loop knowledge and completed tasks.
+- Discover hidden shortcuts by inspecting the right objects on later loops.
+- Keep momentum each loop or pressure rises and descriptions become more hostile.
 - Escape requires both anomaly mastery and report progress.
 
 ### Narrative Structure
@@ -37,6 +39,12 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **The First 10 Loops**: normal office details start drifting.
 - **The Descent**: office geometry and chronology destabilize.
 - **The Truth**: Arthur discovers The Archive and the cost of perpetual productivity.
+
+### Systems Added In Latest Iteration
+
+- **Shortcut Discovery**: inspecting key objects can unlock service routes that persist across loops.
+- **Pressure Meter**: unproductive loops increase pressure; successful loops reduce it.
+- **Escalating Atmosphere Text**: room descriptions react to both stage and pressure level.
 
 ### Controls (DefaultInput.ini)
 

@@ -50,8 +50,9 @@ void AGlitch459PMGameMode::SeedNarrativeData()
         Room.Description = TEXT("Fluorescent lights buzz overhead. Burnt coffee and printer toner hang in the air.");
         Room.Objects = { TEXT("water_cooler"), TEXT("microwave"), TEXT("breakroom_door") };
         Room.Exits = {
-            { TEXT("hallway"), TEXT("Step into hallway"), false, 1, 0, TEXT("") },
-            { TEXT("lobby"), TEXT("Head to lobby"), false, 1, 0, TEXT("") }
+            { TEXT("hallway"), TEXT("Step into hallway"), false, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("lobby"), TEXT("Head to lobby"), false, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("server_room"), TEXT("Use service ladder shortcut"), false, 1, 0, TEXT("A vent panel is bolted shut near the sink."), TEXT("shortcut_service_ladder") }
         };
         Rooms.Add(Room.RoomId, Room);
     }
@@ -63,11 +64,11 @@ void AGlitch459PMGameMode::SeedNarrativeData()
         Room.Description = TEXT("The corridor stretches with sterile symmetry. Framed slogans watch you pass.");
         Room.Objects = { TEXT("wall_clock"), TEXT("poster"), TEXT("exit_sign") };
         Room.Exits = {
-            { TEXT("breakroom"), TEXT("Return to breakroom"), false, 1, 0, TEXT("") },
-            { TEXT("cubicles"), TEXT("Enter cubicles"), false, 1, 0, TEXT("") },
-            { TEXT("lobby"), TEXT("Walk to lobby"), false, 1, 0, TEXT("") },
-            { TEXT("server_room"), TEXT("Swipe into server room"), false, 4, 2, TEXT("Access denied. Productivity score too low.") },
-            { TEXT("ceo_office"), TEXT("Take executive elevator"), false, 7, 4, TEXT("Executive floor restricted to promoted staff.") }
+            { TEXT("breakroom"), TEXT("Return to breakroom"), false, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("cubicles"), TEXT("Enter cubicles"), false, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("lobby"), TEXT("Walk to lobby"), false, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("server_room"), TEXT("Swipe into server room"), false, 4, 2, TEXT("Access denied. Productivity score too low."), TEXT("") },
+            { TEXT("ceo_office"), TEXT("Take executive elevator"), false, 7, 4, TEXT("Executive floor restricted to promoted staff."), TEXT("") }
         };
         Rooms.Add(Room.RoomId, Room);
     }
@@ -79,7 +80,8 @@ void AGlitch459PMGameMode::SeedNarrativeData()
         Room.Description = TEXT("Rows of gray partitions. Dozens of monitors glow with unfinished slides.");
         Room.Objects = { TEXT("coworkers"), TEXT("printer"), TEXT("arthur_terminal"), TEXT("desk_photo") };
         Room.Exits = {
-            { TEXT("hallway"), TEXT("Back to hallway"), false, 1, 0, TEXT("") }
+            { TEXT("hallway"), TEXT("Back to hallway"), false, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("archive"), TEXT("Crawl through records chute"), false, 1, 0, TEXT("The filing chute is sealed behind your cubicle wall."), TEXT("shortcut_archive_chute") }
         };
         Rooms.Add(Room.RoomId, Room);
     }
@@ -91,8 +93,9 @@ void AGlitch459PMGameMode::SeedNarrativeData()
         Room.Description = TEXT("Glass doors frame a sunset that never changes. The carpet smells damp.");
         Room.Objects = { TEXT("exit_doors"), TEXT("reception_bell"), TEXT("security_camera") };
         Room.Exits = {
-            { TEXT("breakroom"), TEXT("Back to breakroom"), false, 1, 0, TEXT("") },
-            { TEXT("lobby_exit"), TEXT("Go through exit doors"), true, 1, 0, TEXT("") }
+            { TEXT("breakroom"), TEXT("Back to breakroom"), false, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("lobby_exit"), TEXT("Go through exit doors"), true, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("ceo_office"), TEXT("Use executive fire stair"), false, 1, 0, TEXT("The stairwell keycard reader rejects you."), TEXT("shortcut_fire_stair") }
         };
         Rooms.Add(Room.RoomId, Room);
     }
@@ -104,8 +107,8 @@ void AGlitch459PMGameMode::SeedNarrativeData()
         Room.Description = TEXT("Cold air and white noise. Towers blink like rows of patient eyes.");
         Room.Objects = { TEXT("rack_13"), TEXT("backup_tapes"), TEXT("timecard_terminal") };
         Room.Exits = {
-            { TEXT("hallway"), TEXT("Return to hallway"), false, 1, 0, TEXT("") },
-            { TEXT("archive"), TEXT("Descend to sublevel archive"), false, 10, 7, TEXT("Sublevel lift offline pending managerial approval.") }
+            { TEXT("hallway"), TEXT("Return to hallway"), false, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("archive"), TEXT("Descend to sublevel archive"), false, 10, 7, TEXT("Sublevel lift offline pending managerial approval."), TEXT("") }
         };
         Rooms.Add(Room.RoomId, Room);
     }
@@ -117,7 +120,7 @@ void AGlitch459PMGameMode::SeedNarrativeData()
         Room.Description = TEXT("Polished stone, silent glass, and a skyline that seems painted on.");
         Room.Objects = { TEXT("sealed_envelope"), TEXT("intercom"), TEXT("mirror_wall") };
         Room.Exits = {
-            { TEXT("hallway"), TEXT("Return to hallway"), false, 1, 0, TEXT("") }
+            { TEXT("hallway"), TEXT("Return to hallway"), false, 1, 0, TEXT(""), TEXT("") }
         };
         Rooms.Add(Room.RoomId, Room);
     }
@@ -129,8 +132,8 @@ void AGlitch459PMGameMode::SeedNarrativeData()
         Room.Description = TEXT("A subterranean floor filled with filing cabinets and exhausted versions of you.");
         Room.Objects = { TEXT("clone_rows"), TEXT("rejected_badges"), TEXT("quit_box") };
         Room.Exits = {
-            { TEXT("server_room"), TEXT("Retreat to server room"), false, 1, 0, TEXT("") },
-            { TEXT("lobby"), TEXT("Emergency stair to lobby"), false, 1, 0, TEXT("") }
+            { TEXT("server_room"), TEXT("Retreat to server room"), false, 1, 0, TEXT(""), TEXT("") },
+            { TEXT("lobby"), TEXT("Emergency stair to lobby"), false, 1, 0, TEXT(""), TEXT("") }
         };
         Rooms.Add(Room.RoomId, Room);
     }
@@ -245,6 +248,30 @@ void AGlitch459PMGameMode::ApplyNarrativeBeatForLoop()
     }
 }
 
+void AGlitch459PMGameMode::EvaluateLoopPressure()
+{
+    int32 CompletedThisLoop = 0;
+    for (const FGlitchTask& Task : CurrentLoopTasks)
+    {
+        if (Task.bCompleted)
+        {
+            ++CompletedThisLoop;
+        }
+    }
+
+    if (!bAnomalyFlaggedThisLoop && CompletedThisLoop == 0)
+    {
+        PressureLevel = FMath::Min(PressureLevel + 1, 5);
+        AddLog(TEXT("You did nothing useful before reset. The office notices."));
+        return;
+    }
+
+    if (bAnomalyFlaggedThisLoop && CompletedThisLoop > 0)
+    {
+        PressureLevel = FMath::Max(PressureLevel - 1, 0);
+    }
+}
+
 void AGlitch459PMGameMode::AddLog(const FString& Message)
 {
     LogLines.Insert(Message, 0);
@@ -302,6 +329,12 @@ bool AGlitch459PMGameMode::IsSelectedObjectAnomaly() const
 
 bool AGlitch459PMGameMode::IsExitUnlocked(const FGlitchExit& Exit, FString& OutReason) const
 {
+    if (!Exit.RequiredShortcut.IsNone() && !DiscoveredShortcuts.Contains(Exit.RequiredShortcut))
+    {
+        OutReason = TEXT("Shortcut not discovered.");
+        return false;
+    }
+
     if (CurrentLoop < Exit.RequiredLoop)
     {
         OutReason = FString::Printf(TEXT("Requires loop %d."), Exit.RequiredLoop);
@@ -333,6 +366,18 @@ FString AGlitch459PMGameMode::BuildObjectDisplayName(const FName& ObjectId) cons
     return ObjectId.ToString().Replace(TEXT("_"), TEXT(" "));
 }
 
+bool AGlitch459PMGameMode::TryUnlockShortcut(const FName& ShortcutId, const FString& DiscoveryMessage)
+{
+    if (ShortcutId.IsNone() || DiscoveredShortcuts.Contains(ShortcutId))
+    {
+        return false;
+    }
+
+    DiscoveredShortcuts.Add(ShortcutId);
+    AddLog(DiscoveryMessage);
+    return true;
+}
+
 void AGlitch459PMGameMode::TickLoopSecond()
 {
     if (bGameWon)
@@ -349,6 +394,8 @@ void AGlitch459PMGameMode::TickLoopSecond()
 
 void AGlitch459PMGameMode::ResetLoop()
 {
+    EvaluateLoopPressure();
+
     ++CurrentLoop;
     CurrentSecond = 0;
     CurrentRoomId = TEXT("breakroom");
@@ -400,12 +447,27 @@ FString AGlitch459PMGameMode::GetCurrentRoomDescription() const
 
     if (CurrentLoop <= 10)
     {
-        return Room->Description;
+        if (PressureLevel == 0)
+        {
+            return Room->Description;
+        }
+
+        return Room->Description + TEXT(" You feel watched by deadlines you missed.");
     }
 
     if (CurrentLoop <= 13)
     {
+        if (PressureLevel >= 4)
+        {
+            return Room->Description + TEXT(" Distances shift and your heartbeat drowns the lights.");
+        }
+
         return Room->Description + TEXT(" Distances shift when you stop looking directly at them.");
+    }
+
+    if (PressureLevel >= 4)
+    {
+        return Room->Description + TEXT(" The place feels less like architecture and more like a sentence being shouted." );
     }
 
     return Room->Description + TEXT(" The place feels less like architecture and more like a sentence.");
@@ -479,6 +541,30 @@ FString AGlitch459PMGameMode::GetSelectedObjectDescriptionAndClue()
             Description = Anomaly->Description;
             AddLog(FString::Printf(TEXT("Anomaly clue: %s"), *Anomaly->Clue));
         }
+    }
+
+    if (CurrentRoomId == TEXT("breakroom") && ObjectId == TEXT("breakroom_door") && CurrentLoop >= 5)
+    {
+        TryUnlockShortcut(
+            TEXT("shortcut_service_ladder"),
+            TEXT("You pry open the breakroom vent. A service ladder bypass is now available.")
+        );
+    }
+
+    if (CurrentRoomId == TEXT("lobby") && ObjectId == TEXT("security_camera") && CurrentLoop >= 8)
+    {
+        TryUnlockShortcut(
+            TEXT("shortcut_fire_stair"),
+            TEXT("You copy an executive badge pattern from the camera feed. Fire stair unlocked.")
+        );
+    }
+
+    if (CurrentRoomId == TEXT("cubicles") && ObjectId == TEXT("desk_photo") && CurrentLoop >= 9)
+    {
+        TryUnlockShortcut(
+            TEXT("shortcut_archive_chute"),
+            TEXT("Behind the framed photo is a maintenance chute map. Archive shortcut unlocked.")
+        );
     }
 
     LastInspectionText = Description;

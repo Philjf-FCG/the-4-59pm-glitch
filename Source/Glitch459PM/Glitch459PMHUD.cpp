@@ -39,7 +39,20 @@ void AGlitch459PMHUD::DrawHUD()
     );
     Y += 42.0f;
 
-    DrawText(FString::Printf(TEXT("Stage: %s    Tasks Completed: %d"), *GameMode->GetNarrativeStageLabel(), GameMode->GetCompletedTaskCount()), FLinearColor(0.9f, 0.78f, 0.74f), X, Y, Font, 1.0f);
+    DrawText(
+        FString::Printf(
+            TEXT("Stage: %s    Tasks: %d    Shortcuts: %d    Pressure: %d/5"),
+            *GameMode->GetNarrativeStageLabel(),
+            GameMode->GetCompletedTaskCount(),
+            GameMode->GetDiscoveredShortcutCount(),
+            GameMode->GetPressureLevel()
+        ),
+        FLinearColor(0.9f, 0.78f, 0.74f),
+        X,
+        Y,
+        Font,
+        1.0f
+    );
     Y += 28.0f;
 
     DrawText(FString::Printf(TEXT("Room: %s"), *GameMode->GetCurrentRoomName()), FLinearColor::White, X, Y, Font, 1.1f);

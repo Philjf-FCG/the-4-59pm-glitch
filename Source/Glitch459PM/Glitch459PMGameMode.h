@@ -26,6 +26,9 @@ struct FGlitchExit
 
     UPROPERTY()
     FString LockedReason;
+
+    UPROPERTY()
+    FName RequiredShortcut;
 };
 
 USTRUCT()
@@ -121,6 +124,8 @@ public:
     FString GetLastInspectionText() const { return LastInspectionText; }
 
     FString GetNarrativeStageLabel() const;
+    int32 GetPressureLevel() const { return PressureLevel; }
+    int32 GetDiscoveredShortcutCount() const { return DiscoveredShortcuts.Num(); }
     int32 GetCompletedTaskCount() const { return CompletedTaskCount; }
     FString GetSelectedTaskPrompt() const;
     bool IsSelectedTaskCompleted() const;
@@ -145,6 +150,7 @@ private:
     void SeedTaskPools();
     void BuildLoopTasks();
     void ApplyNarrativeBeatForLoop();
+    void EvaluateLoopPressure();
     void AddLog(const FString& Message);
     void PickNextAnomaly();
     const FGlitchRoom* GetCurrentRoom() const;
@@ -154,6 +160,8 @@ private:
 
     const FGlitchTask* GetSelectedTask() const;
     FGlitchTask* GetSelectedTaskMutable();
+
+    bool TryUnlockShortcut(const FName& ShortcutId, const FString& DiscoveryMessage);
 
     FString BuildObjectDisplayName(const FName& ObjectId) const;
 
@@ -202,6 +210,9 @@ private:
     UPROPERTY()
     int32 CompletedTaskCount = 0;
 
+    UPROPERTY()
+    int32 PressureLevel = 0;
+
     UPROPERTY(EditDefaultsOnly)
     int32 RequiredAnomalies = 5;
 
@@ -222,6 +233,9 @@ private:
 
     UPROPERTY()
     FString LastInspectionText;
+
+    UPROPERTY()
+    TSet<FName> DiscoveredShortcuts;
 
     FTimerHandle LoopTimerHandle;
 };
