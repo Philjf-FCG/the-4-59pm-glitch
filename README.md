@@ -52,6 +52,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Reachability-Safe Task Picks**: loop task generation now favors objectives the player can actually reach in that loop.
 - **Memory Fragments**: inspect late-loop objects to recover Arthur's personal memories and unlock a superior ending path.
 - **Premonitions**: each loop starts with a hint about reality drift; low pressure gives reliable clues, high pressure corrupts them.
+- **Anomaly Report Risk**: false reports immediately raise pressure while correct reports can calm it.
 
 ### Controls (DefaultInput.ini)
 

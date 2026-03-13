@@ -872,6 +872,12 @@ bool AGlitch459PMGameMode::TryFlagSelectedObject()
         ResolvedAnomalies = FMath::Min(ResolvedAnomalies + 1, RequiredAnomalies);
         AddLog(TEXT("Anomaly flagged. Reality steadies for exactly one breath."));
 
+        if (PressureLevel > 0)
+        {
+            PressureLevel = FMath::Max(PressureLevel - 1, 0);
+            AddLog(TEXT("A correct report lowers your panic for this loop."));
+        }
+
         if (ResolvedAnomalies >= RequiredAnomalies && !bEndingHintLogged)
         {
             bEndingHintLogged = true;
@@ -881,7 +887,9 @@ bool AGlitch459PMGameMode::TryFlagSelectedObject()
         return true;
     }
 
+    PressureLevel = FMath::Min(PressureLevel + 1, 5);
     AddLog(TEXT("False report. HR auto-reply: Thank you for your vigilance."));
+    AddLog(TEXT("Pressure rises after filing the wrong incident."));
     return false;
 }
 
