@@ -676,6 +676,36 @@ FString AGlitch459PMGameMode::GetCurrentRoomDescription() const
     return Room->Description + TEXT(" The place feels less like architecture and more like a sentence.");
 }
 
+FString AGlitch459PMGameMode::GetTerminalStatusText() const
+{
+    FString TaskLine = TEXT("NO ACTIVE TASK");
+    if (const FGlitchTask* Task = GetSelectedTask())
+    {
+        const FString Prefix = Task->bSurreal ? TEXT("SURREAL") : TEXT("REPORT");
+        const FString Status = Task->bCompleted ? TEXT("DONE") : TEXT("PENDING");
+        TaskLine = FString::Printf(TEXT("%s: %s [%s]"), *Prefix, *Task->Prompt, *Status);
+    }
+
+    const FString IntercomState = bIntercomActiveThisLoop ? TEXT("ACTIVE") : TEXT("QUIET");
+    const FString OutcomeHint = CollectedFragments.Num() >= RequiredFragments
+        ? TEXT("MEMORY RESTORED")
+        : TEXT("MEMORY INCOMPLETE");
+
+    return FString::Printf(
+        TEXT("FINAL FRIDAY REPORT TERMINAL\nTIME %s\nLOOP %d\nPRESSURE %d/5\nANOMALIES %d/%d\nFRAGMENTS %d/%d\nINTERCOM %s\n%s\n%s"),
+        *GetClockText(),
+        CurrentLoop,
+        PressureLevel,
+        ResolvedAnomalies,
+        RequiredAnomalies,
+        CollectedFragments.Num(),
+        RequiredFragments,
+        *IntercomState,
+        *TaskLine,
+        *OutcomeHint
+    );
+}
+
 FString AGlitch459PMGameMode::GetSelectedObjectName() const
 {
     const FGlitchRoom* Room = GetCurrentRoom();

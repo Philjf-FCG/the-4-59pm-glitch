@@ -1,0 +1,39 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "Glitch459PMStatusTerminal.generated.h"
+
+UCLASS()
+class GLITCH459PM_API AGlitch459PMStatusTerminal : public AActor
+{
+    GENERATED_BODY()
+
+public:
+    AGlitch459PMStatusTerminal();
+
+    virtual void Tick(float DeltaSeconds) override;
+
+protected:
+    virtual void BeginPlay() override;
+
+private:
+    UPROPERTY(VisibleAnywhere)
+    class USceneComponent* SceneRoot;
+
+    UPROPERTY(VisibleAnywhere)
+    class UStaticMeshComponent* TerminalBody;
+
+    UPROPERTY(VisibleAnywhere)
+    class UTextRenderComponent* ScreenText;
+
+    UPROPERTY(EditAnywhere, Category = "Terminal")
+    float RefreshInterval = 0.25f;
+
+    UPROPERTY(EditAnywhere, Category = "Terminal")
+    FString FallbackText = TEXT("TERMINAL OFFLINE");
+
+    float TimeSinceRefresh = 0.0f;
+
+    void RefreshScreen();
+};

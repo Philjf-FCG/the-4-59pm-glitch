@@ -53,6 +53,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Memory Fragments**: inspect late-loop objects to recover Arthur's personal memories and unlock a superior ending path.
 - **Premonitions**: each loop starts with a hint about reality drift; low pressure gives reliable clues, high pressure corrupts them.
 - **Anomaly Report Risk**: false reports immediately raise pressure while correct reports can calm it.
+- **Diegetic Status Terminal**: a placeable actor can mirror loop status, tasks, anomaly count, and restored-memory state directly in the world.
 
 ### Controls (DefaultInput.ini)
 
@@ -73,6 +74,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - `Source/Glitch459PM/Glitch459PMPlayerController.*`: input bindings and player actions
 - `Source/Glitch459PM/Glitch459PMPawn.*`: first-person movement and sprint pacing
 - `Source/Glitch459PM/Glitch459PMHUD.*`: on-screen narrative HUD, loop/task/status display
+- `Source/Glitch459PM/Glitch459PMStatusTerminal.*`: placeable in-world terminal actor that displays live loop state
 - `Config/DefaultInput.ini`: key mappings
 - `Config/DefaultGame.ini`: default game mode wiring
 - `ASSET_SOURCING.md`: royalty-free asset integration plan and attribution log

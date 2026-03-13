@@ -124,6 +124,7 @@ public:
 
     FString GetCurrentRoomName() const;
     FString GetCurrentRoomDescription() const;
+    FString GetTerminalStatusText() const;
     FString GetSelectedObjectName() const;
     FString GetSelectedExitLabel() const;
     FString GetSelectedObjectDescriptionAndClue();
