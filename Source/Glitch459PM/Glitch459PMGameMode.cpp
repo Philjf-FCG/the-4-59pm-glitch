@@ -67,7 +67,7 @@ void AGlitch459PMGameMode::SeedNarrativeData()
             { TEXT("breakroom"), TEXT("Return to breakroom"), false, 1, 0, TEXT(""), TEXT("") },
             { TEXT("cubicles"), TEXT("Enter cubicles"), false, 1, 0, TEXT(""), TEXT("") },
             { TEXT("lobby"), TEXT("Walk to lobby"), false, 1, 0, TEXT(""), TEXT("") },
-            { TEXT("server_room"), TEXT("Swipe into server room"), false, 4, 2, TEXT("Access denied. Productivity score too low."), TEXT("") },
+            { TEXT("server_room"), TEXT("Swipe into server room"), false, 4, 0, TEXT("Access denied. Productivity score too low."), TEXT("") },
             { TEXT("ceo_office"), TEXT("Take executive elevator"), false, 7, 4, TEXT("Executive floor restricted to promoted staff."), TEXT("") }
         };
         Rooms.Add(Room.RoomId, Room);
@@ -204,15 +204,35 @@ void AGlitch459PMGameMode::BuildLoopTasks()
         return;
     }
 
-    const int32 MundaneIndex = FMath::RandRange(0, MundaneTaskPool.Num() - 1);
-    FGlitchTask Mundane = MundaneTaskPool[MundaneIndex];
+    TArray<FGlitchTask> EligibleMundane;
+    for (const FGlitchTask& Candidate : MundaneTaskPool)
+    {
+        if (IsTaskEligibleForCurrentLoop(Candidate))
+        {
+            EligibleMundane.Add(Candidate);
+        }
+    }
+
+    const TArray<FGlitchTask>& MundanePool = EligibleMundane.IsEmpty() ? MundaneTaskPool : EligibleMundane;
+    const int32 MundaneIndex = FMath::RandRange(0, MundanePool.Num() - 1);
+    FGlitchTask Mundane = MundanePool[MundaneIndex];
     Mundane.bCompleted = false;
     CurrentLoopTasks.Add(Mundane);
 
     if (CurrentLoop >= 6)
     {
-        const int32 SurrealIndex = FMath::RandRange(0, SurrealTaskPool.Num() - 1);
-        FGlitchTask Surreal = SurrealTaskPool[SurrealIndex];
+        TArray<FGlitchTask> EligibleSurreal;
+        for (const FGlitchTask& Candidate : SurrealTaskPool)
+        {
+            if (IsTaskEligibleForCurrentLoop(Candidate))
+            {
+                EligibleSurreal.Add(Candidate);
+            }
+        }
+
+        const TArray<FGlitchTask>& SurrealPool = EligibleSurreal.IsEmpty() ? SurrealTaskPool : EligibleSurreal;
+        const int32 SurrealIndex = FMath::RandRange(0, SurrealPool.Num() - 1);
+        FGlitchTask Surreal = SurrealPool[SurrealIndex];
         Surreal.bCompleted = false;
         CurrentLoopTasks.Add(Surreal);
     }
@@ -348,6 +368,55 @@ bool AGlitch459PMGameMode::IsExitUnlocked(const FGlitchExit& Exit, FString& OutR
     }
 
     OutReason = TEXT("");
+    return true;
+}
+
+bool AGlitch459PMGameMode::IsTaskEligibleForCurrentLoop(const FGlitchTask& Task) const
+{
+    if (Task.RequiredRoom.IsNone())
+    {
+        return true;
+    }
+
+    const FGlitchRoom* RequiredRoom = Rooms.Find(Task.RequiredRoom);
+    if (!RequiredRoom)
+    {
+        return false;
+    }
+
+    if (!Task.RequiredObject.IsNone() && !RequiredRoom->Objects.Contains(Task.RequiredObject))
+    {
+        return false;
+    }
+
+    if (Task.RequiredRoom == TEXT("server_room"))
+    {
+        if (CurrentLoop < 4 && !DiscoveredShortcuts.Contains(TEXT("shortcut_service_ladder")))
+        {
+            return false;
+        }
+    }
+
+    if (Task.RequiredRoom == TEXT("ceo_office"))
+    {
+        const bool bCanUseElevator = (CurrentLoop >= 7 && CompletedTaskCount >= 4);
+        const bool bHasFireStair = DiscoveredShortcuts.Contains(TEXT("shortcut_fire_stair"));
+        if (!bCanUseElevator && !bHasFireStair)
+        {
+            return false;
+        }
+    }
+
+    if (Task.RequiredRoom == TEXT("archive"))
+    {
+        const bool bCanUseLift = (CurrentLoop >= 10 && CompletedTaskCount >= 7);
+        const bool bHasChute = DiscoveredShortcuts.Contains(TEXT("shortcut_archive_chute"));
+        if (!bCanUseLift && !bHasChute)
+        {
+            return false;
+        }
+    }
+
     return true;
 }
 

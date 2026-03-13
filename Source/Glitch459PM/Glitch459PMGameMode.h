@@ -168,6 +168,7 @@ private:
 
     const FGlitchTask* GetSelectedTask() const;
     FGlitchTask* GetSelectedTaskMutable();
+    bool IsTaskEligibleForCurrentLoop(const FGlitchTask& Task) const;
 
     bool TryUnlockShortcut(const FName& ShortcutId, const FString& DiscoveryMessage);
 

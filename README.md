@@ -48,6 +48,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Intercom Intrusions**: pressure and late loops trigger boss voice interruptions with personalized taunts.
 - **Branching End States**: true Saturday escape, corporate "promotion" trap ending, and overload collapse failure.
 - **Adaptive Loop Duration**: rising pressure shortens the loop timer, increasing urgency and route planning demands.
+- **Reachability-Safe Task Picks**: loop task generation now favors objectives the player can actually reach in that loop.
 
 ### Controls (DefaultInput.ini)
 
