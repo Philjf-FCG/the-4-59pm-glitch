@@ -46,6 +46,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 7. Use exits to unlock deeper routes through the office. Some exits need loop knowledge, completed tasks, or discovered shortcuts.
 8. Review the new loop-review line after every reset. It tells you whether you actually made progress before the clock snapped back.
 9. To reach the best ending, combine anomaly stabilization, task progress, and all memory fragments before taking the lobby exit.
+10. Recent anomalies and tasks are rotated to avoid immediate repetition, so later loops should expose more of the office before the cycle repeats.
 
 ### Narrative Structure
 
@@ -70,6 +71,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Compliance Consequences**: obedience now changes intercom tone and gates the corporate promotion branch.
 - **Room-Specific Distortion**: pressure no longer escalates with only generic text; each room now mutates in its own way as the office destabilizes.
 - **Loop Review**: every reset now records what you achieved or missed, making failed loops easier to read and correct.
+- **Content Rotation**: anomalies cycle through the deck before repeating, and tasks avoid immediate back-to-back duplicates when alternatives exist.
 
 ### Controls (DefaultInput.ini)
 

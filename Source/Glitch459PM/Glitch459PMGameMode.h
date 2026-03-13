@@ -288,6 +288,15 @@ private:
     UPROPERTY()
     TSet<FName> CollectedFragments;
 
+    UPROPERTY()
+    TSet<FName> SeenAnomaliesThisCycle;
+
+    UPROPERTY()
+    FName LastMundaneTaskId;
+
+    UPROPERTY()
+    FName LastSurrealTaskId;
+
     UPROPERTY(EditDefaultsOnly)
     int32 RequiredFragments = 3;
 

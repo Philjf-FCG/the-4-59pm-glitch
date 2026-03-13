@@ -215,10 +215,19 @@ void AGlitch459PMGameMode::BuildLoopTasks()
         }
     }
 
+    if (EligibleMundane.Num() > 1 && !LastMundaneTaskId.IsNone())
+    {
+        EligibleMundane.RemoveAll([this](const FGlitchTask& Candidate)
+        {
+            return Candidate.Id == LastMundaneTaskId;
+        });
+    }
+
     const TArray<FGlitchTask>& MundanePool = EligibleMundane.IsEmpty() ? MundaneTaskPool : EligibleMundane;
     const int32 MundaneIndex = FMath::RandRange(0, MundanePool.Num() - 1);
     FGlitchTask Mundane = MundanePool[MundaneIndex];
     Mundane.bCompleted = false;
+    LastMundaneTaskId = Mundane.Id;
     CurrentLoopTasks.Add(Mundane);
 
     if (CurrentLoop >= 6)
@@ -232,10 +241,19 @@ void AGlitch459PMGameMode::BuildLoopTasks()
             }
         }
 
+        if (EligibleSurreal.Num() > 1 && !LastSurrealTaskId.IsNone())
+        {
+            EligibleSurreal.RemoveAll([this](const FGlitchTask& Candidate)
+            {
+                return Candidate.Id == LastSurrealTaskId;
+            });
+        }
+
         const TArray<FGlitchTask>& SurrealPool = EligibleSurreal.IsEmpty() ? SurrealTaskPool : EligibleSurreal;
         const int32 SurrealIndex = FMath::RandRange(0, SurrealPool.Num() - 1);
         FGlitchTask Surreal = SurrealPool[SurrealIndex];
         Surreal.bCompleted = false;
+        LastSurrealTaskId = Surreal.Id;
         CurrentLoopTasks.Add(Surreal);
     }
 
@@ -332,18 +350,42 @@ void AGlitch459PMGameMode::PickNextAnomaly()
         return;
     }
 
-    const int32 LastIndex = CurrentAnomalyIndex;
-    int32 NewIndex = FMath::RandRange(0, AnomalyDeck.Num() - 1);
+    if (SeenAnomaliesThisCycle.Num() >= AnomalyDeck.Num())
+    {
+        SeenAnomaliesThisCycle.Empty();
+    }
 
-    if (AnomalyDeck.Num() > 1)
+    const int32 LastIndex = CurrentAnomalyIndex;
+    TArray<int32> CandidateIndices;
+    for (int32 Index = 0; Index < AnomalyDeck.Num(); ++Index)
+    {
+        const bool bSeenThisCycle = SeenAnomaliesThisCycle.Contains(AnomalyDeck[Index].Id);
+        if (!bSeenThisCycle)
+        {
+            CandidateIndices.Add(Index);
+        }
+    }
+
+    if (CandidateIndices.IsEmpty())
+    {
+        for (int32 Index = 0; Index < AnomalyDeck.Num(); ++Index)
+        {
+            CandidateIndices.Add(Index);
+        }
+    }
+
+    int32 NewIndex = CandidateIndices[FMath::RandRange(0, CandidateIndices.Num() - 1)];
+
+    if (CandidateIndices.Num() > 1)
     {
         while (NewIndex == LastIndex)
         {
-            NewIndex = FMath::RandRange(0, AnomalyDeck.Num() - 1);
+            NewIndex = CandidateIndices[FMath::RandRange(0, CandidateIndices.Num() - 1)];
         }
     }
 
     CurrentAnomalyIndex = NewIndex;
+    SeenAnomaliesThisCycle.Add(AnomalyDeck[CurrentAnomalyIndex].Id);
 }
 
 const FGlitchRoom* AGlitch459PMGameMode::GetCurrentRoom() const
