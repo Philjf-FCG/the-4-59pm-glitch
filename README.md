@@ -45,6 +45,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Shortcut Discovery**: inspecting key objects can unlock service routes that persist across loops.
 - **Pressure Meter**: unproductive loops increase pressure; successful loops reduce it.
 - **Escalating Atmosphere Text**: room descriptions react to both stage and pressure level.
+- **Intercom Intrusions**: pressure and late loops trigger boss voice interruptions with personalized taunts.
 
 ### Controls (DefaultInput.ini)
 

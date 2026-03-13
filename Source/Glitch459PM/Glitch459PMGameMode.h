@@ -127,6 +127,7 @@ public:
     int32 GetPressureLevel() const { return PressureLevel; }
     int32 GetDiscoveredShortcutCount() const { return DiscoveredShortcuts.Num(); }
     int32 GetCompletedTaskCount() const { return CompletedTaskCount; }
+    bool IsIntercomActiveThisLoop() const { return bIntercomActiveThisLoop; }
     FString GetSelectedTaskPrompt() const;
     bool IsSelectedTaskCompleted() const;
 
@@ -151,6 +152,7 @@ private:
     void BuildLoopTasks();
     void ApplyNarrativeBeatForLoop();
     void EvaluateLoopPressure();
+    void HandleIntercomWhisper();
     void AddLog(const FString& Message);
     void PickNextAnomaly();
     const FGlitchRoom* GetCurrentRoom() const;
@@ -236,6 +238,15 @@ private:
 
     UPROPERTY()
     TSet<FName> DiscoveredShortcuts;
+
+    UPROPERTY()
+    bool bIntercomActiveThisLoop = false;
+
+    UPROPERTY()
+    int32 NextIntercomSecond = 20;
+
+    UPROPERTY()
+    int32 LastIntercomLineIndex = INDEX_NONE;
 
     FTimerHandle LoopTimerHandle;
 };

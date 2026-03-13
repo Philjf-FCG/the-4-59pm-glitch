@@ -378,6 +378,45 @@ bool AGlitch459PMGameMode::TryUnlockShortcut(const FName& ShortcutId, const FStr
     return true;
 }
 
+void AGlitch459PMGameMode::HandleIntercomWhisper()
+{
+    const bool bShouldRunIntercom = CurrentLoop >= 8 || PressureLevel >= 3;
+    if (!bShouldRunIntercom || CurrentSecond < NextIntercomSecond)
+    {
+        return;
+    }
+
+    const TArray<FString> IntercomLines = {
+        TEXT("Arthur, your promotion packet is almost ready. Keep working."),
+        TEXT("Arthur, the weekend is a privilege tier you have not unlocked."),
+        TEXT("Arthur, we reviewed your resignation. It was denied retroactively."),
+        TEXT("Arthur, productivity is how we measure the soul."),
+        TEXT("Arthur, the Archive says you are improving."),
+        TEXT("Arthur, your best years are still in this building.")
+    };
+
+    if (IntercomLines.Num() == 0)
+    {
+        return;
+    }
+
+    int32 NewLineIndex = FMath::RandRange(0, IntercomLines.Num() - 1);
+    if (IntercomLines.Num() > 1)
+    {
+        while (NewLineIndex == LastIntercomLineIndex)
+        {
+            NewLineIndex = FMath::RandRange(0, IntercomLines.Num() - 1);
+        }
+    }
+
+    LastIntercomLineIndex = NewLineIndex;
+    bIntercomActiveThisLoop = true;
+    AddLog(FString::Printf(TEXT("INTERCOM: %s"), *IntercomLines[NewLineIndex]));
+
+    const int32 NextGap = 10 + FMath::RandRange(0, 8);
+    NextIntercomSecond = FMath::Min(CurrentSecond + NextGap, LoopDurationSeconds - 2);
+}
+
 void AGlitch459PMGameMode::TickLoopSecond()
 {
     if (bGameWon)
@@ -386,6 +425,8 @@ void AGlitch459PMGameMode::TickLoopSecond()
     }
 
     ++CurrentSecond;
+    HandleIntercomWhisper();
+
     if (CurrentSecond >= LoopDurationSeconds)
     {
         ResetLoop();
@@ -402,6 +443,8 @@ void AGlitch459PMGameMode::ResetLoop()
     SelectedObjectIndex = 0;
     SelectedExitIndex = 0;
     bAnomalyFlaggedThisLoop = false;
+    bIntercomActiveThisLoop = false;
+    NextIntercomSecond = 18 + FMath::RandRange(0, 8);
 
     PickNextAnomaly();
     BuildLoopTasks();
