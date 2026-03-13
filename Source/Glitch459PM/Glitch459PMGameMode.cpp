@@ -11,6 +11,13 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 
+namespace
+{
+    const FVector FallbackOfficeOrigin(0.0f, 0.0f, 12000.0f);
+    const FVector FallbackTerminalOffset(180.0f, -120.0f, 92.0f);
+    const FVector FallbackPlayerOffset(-420.0f, 0.0f, 120.0f);
+}
+
 AGlitch459PMGameMode::AGlitch459PMGameMode()
 {
     PlayerControllerClass = AGlitch459PMPlayerController::StaticClass();
@@ -66,7 +73,9 @@ void AGlitch459PMGameMode::EnsurePlayableSpace()
 
     if (!SpawnedOfficeShell)
     {
-        SpawnedOfficeShell = World->SpawnActor<AGlitch459PMOfficeShell>(FVector::ZeroVector, FRotator::ZeroRotator);
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        SpawnedOfficeShell = World->SpawnActor<AGlitch459PMOfficeShell>(FallbackOfficeOrigin, FRotator::ZeroRotator, SpawnParams);
     }
 
     if (!SpawnedStatusTerminal)
@@ -80,7 +89,9 @@ void AGlitch459PMGameMode::EnsurePlayableSpace()
 
     if (!SpawnedStatusTerminal)
     {
-        SpawnedStatusTerminal = World->SpawnActor<AGlitch459PMStatusTerminal>(FVector(180.0f, -120.0f, 92.0f), FRotator(0.0f, 90.0f, 0.0f));
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        SpawnedStatusTerminal = World->SpawnActor<AGlitch459PMStatusTerminal>(FallbackOfficeOrigin + FallbackTerminalOffset, FRotator(0.0f, 90.0f, 0.0f), SpawnParams);
     }
 }
 
@@ -98,7 +109,7 @@ void AGlitch459PMGameMode::PositionPlayerForPlay() const
         return;
     }
 
-    PlayerPawn->SetActorLocation(FVector(-420.0f, 0.0f, 120.0f));
+    PlayerPawn->SetActorLocation(FallbackOfficeOrigin + FallbackPlayerOffset);
     PlayerPawn->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
 }
 
