@@ -92,11 +92,19 @@ void AGlitch459PMHUD::DrawHUD()
         Y += 20.0f;
     }
 
-    if (GameMode->HasWon())
+    if (GameMode->HasEnded())
     {
-        const FString WinMessage = TEXT("Saturday. The second hand passes 12 and keeps moving.");
+        const bool bLost = GameMode->HasLost();
+        const FString Headline = GameMode->GetEndingHeadline().IsEmpty()
+            ? (bLost ? TEXT("Failure") : TEXT("Outcome"))
+            : GameMode->GetEndingHeadline();
+        const FString Body = GameMode->GetEndingBody().IsEmpty()
+            ? TEXT("The loop has concluded.")
+            : GameMode->GetEndingBody();
+
         const float CenterX = Canvas->ClipX * 0.5f - 280.0f;
-        const float CenterY = Canvas->ClipY * 0.8f;
-        DrawText(WinMessage, FLinearColor(1.0f, 0.95f, 0.7f), CenterX, CenterY, Font, 1.2f);
+        const float CenterY = Canvas->ClipY * 0.76f;
+        DrawText(Headline, bLost ? FLinearColor(1.0f, 0.55f, 0.55f) : FLinearColor(1.0f, 0.95f, 0.7f), CenterX, CenterY, Font, 1.3f);
+        DrawText(Body, FLinearColor(0.92f, 0.92f, 0.92f), CenterX, CenterY + 28.0f, Font, 0.95f);
     }
 }

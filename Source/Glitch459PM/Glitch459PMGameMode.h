@@ -115,6 +115,10 @@ public:
     int32 GetResolvedAnomalies() const { return ResolvedAnomalies; }
     int32 GetRequiredAnomalies() const { return RequiredAnomalies; }
     bool HasWon() const { return bGameWon; }
+    bool HasLost() const { return bGameLost; }
+    bool HasEnded() const { return bGameWon || bGameLost; }
+    FString GetEndingHeadline() const { return EndingHeadline; }
+    FString GetEndingBody() const { return EndingBody; }
 
     FString GetCurrentRoomName() const;
     FString GetCurrentRoomDescription() const;
@@ -221,11 +225,17 @@ private:
     UPROPERTY(EditDefaultsOnly)
     int32 LoopDurationSeconds = 60;
 
+    UPROPERTY(EditDefaultsOnly)
+    int32 MaxOverloadStrikes = 3;
+
     UPROPERTY()
     bool bAnomalyFlaggedThisLoop = false;
 
     UPROPERTY()
     bool bGameWon = false;
+
+    UPROPERTY()
+    bool bGameLost = false;
 
     UPROPERTY()
     bool bEndingHintLogged = false;
@@ -235,6 +245,15 @@ private:
 
     UPROPERTY()
     FString LastInspectionText;
+
+    UPROPERTY()
+    int32 OverloadStrikes = 0;
+
+    UPROPERTY()
+    FString EndingHeadline;
+
+    UPROPERTY()
+    FString EndingBody;
 
     UPROPERTY()
     TSet<FName> DiscoveredShortcuts;

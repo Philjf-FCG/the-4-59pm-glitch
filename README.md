@@ -46,6 +46,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Pressure Meter**: unproductive loops increase pressure; successful loops reduce it.
 - **Escalating Atmosphere Text**: room descriptions react to both stage and pressure level.
 - **Intercom Intrusions**: pressure and late loops trigger boss voice interruptions with personalized taunts.
+- **Branching End States**: true Saturday escape, corporate "promotion" trap ending, and overload collapse failure.
 
 ### Controls (DefaultInput.ini)
 

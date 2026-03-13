@@ -419,7 +419,7 @@ void AGlitch459PMGameMode::HandleIntercomWhisper()
 
 void AGlitch459PMGameMode::TickLoopSecond()
 {
-    if (bGameWon)
+    if (HasEnded())
     {
         return;
     }
@@ -436,6 +436,25 @@ void AGlitch459PMGameMode::TickLoopSecond()
 void AGlitch459PMGameMode::ResetLoop()
 {
     EvaluateLoopPressure();
+
+    if (PressureLevel >= 5)
+    {
+        ++OverloadStrikes;
+        AddLog(FString::Printf(TEXT("Overload strike %d/%d: the office is tightening around you."), OverloadStrikes, MaxOverloadStrikes));
+
+        if (OverloadStrikes >= MaxOverloadStrikes)
+        {
+            bGameLost = true;
+            EndingHeadline = TEXT("Still On The Clock");
+            EndingBody = TEXT("The building promotes your body to furniture. 4:59 PM continues without you.");
+            AddLog(TEXT("You are no longer an employee. You are infrastructure."));
+            return;
+        }
+    }
+    else if (bAnomalyFlaggedThisLoop)
+    {
+        OverloadStrikes = FMath::Max(OverloadStrikes - 1, 0);
+    }
 
     ++CurrentLoop;
     CurrentSecond = 0;
@@ -680,7 +699,7 @@ void AGlitch459PMGameMode::SelectPreviousTask()
 
 bool AGlitch459PMGameMode::TryFlagSelectedObject()
 {
-    if (bGameWon)
+    if (HasEnded())
     {
         return false;
     }
@@ -740,7 +759,7 @@ bool AGlitch459PMGameMode::TryCompleteSelectedTask()
 
 bool AGlitch459PMGameMode::TryUseSelectedExit()
 {
-    if (bGameWon)
+    if (HasEnded())
     {
         return true;
     }
@@ -758,8 +777,20 @@ bool AGlitch459PMGameMode::TryUseSelectedExit()
         if (ResolvedAnomalies >= RequiredAnomalies && CompletedTaskCount >= 8)
         {
             bGameWon = true;
+            EndingHeadline = TEXT("Saturday");
+            EndingBody = TEXT("The second hand crosses 12 and does not return. You leave the building as Arthur, not an employee number.");
             AddLog(TEXT("Saturday. The second hand crosses 12 and does not return."));
             AddLog(TEXT("Promotion status: irrelevant. You chose the weekend anyway."));
+            return true;
+        }
+
+        if (CompletedTaskCount >= 12 && ResolvedAnomalies < RequiredAnomalies)
+        {
+            bGameWon = true;
+            EndingHeadline = TEXT("Promotion Granted");
+            EndingBody = TEXT("The doors open into a bigger office with no windows and no clock out button.");
+            AddLog(TEXT("Congratulations, Arthur. Promotion approved."));
+            AddLog(TEXT("Your new shift begins now."));
             return true;
         }
 
