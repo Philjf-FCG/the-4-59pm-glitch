@@ -22,6 +22,8 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 4. Open `The459PMGlitch.uproject` in UE.
 5. Press Play (PIE).
 
+If you press Play in an otherwise empty map, the prototype now spawns a fallback office shell, light, and status terminal automatically so the game remains testable without authored level content.
+
 ### Gameplay Loop
 
 - Time starts at `4:57:00 PM` and advances each second.

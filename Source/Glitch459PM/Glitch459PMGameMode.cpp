@@ -1,8 +1,13 @@
 #include "Glitch459PMGameMode.h"
 
 #include "Glitch459PMHUD.h"
+#include "Glitch459PMOfficeShell.h"
 #include "Glitch459PMPawn.h"
 #include "Glitch459PMPlayerController.h"
+#include "Glitch459PMStatusTerminal.h"
+#include "EngineUtils.h"
+#include "GameFramework/Pawn.h"
+#include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
 
@@ -16,6 +21,9 @@ AGlitch459PMGameMode::AGlitch459PMGameMode()
 void AGlitch459PMGameMode::BeginPlay()
 {
     Super::BeginPlay();
+
+    EnsurePlayableSpace();
+    PositionPlayerForPlay();
 
     SeedNarrativeData();
     SeedTaskPools();
@@ -37,6 +45,61 @@ void AGlitch459PMGameMode::BeginPlay()
         1.0f,
         true
     );
+}
+
+void AGlitch459PMGameMode::EnsurePlayableSpace()
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return;
+    }
+
+    if (!SpawnedOfficeShell)
+    {
+        for (TActorIterator<AGlitch459PMOfficeShell> It(World); It; ++It)
+        {
+            SpawnedOfficeShell = *It;
+            break;
+        }
+    }
+
+    if (!SpawnedOfficeShell)
+    {
+        SpawnedOfficeShell = World->SpawnActor<AGlitch459PMOfficeShell>(FVector::ZeroVector, FRotator::ZeroRotator);
+    }
+
+    if (!SpawnedStatusTerminal)
+    {
+        for (TActorIterator<AGlitch459PMStatusTerminal> It(World); It; ++It)
+        {
+            SpawnedStatusTerminal = *It;
+            break;
+        }
+    }
+
+    if (!SpawnedStatusTerminal)
+    {
+        SpawnedStatusTerminal = World->SpawnActor<AGlitch459PMStatusTerminal>(FVector(180.0f, -120.0f, 92.0f), FRotator(0.0f, 90.0f, 0.0f));
+    }
+}
+
+void AGlitch459PMGameMode::PositionPlayerForPlay() const
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return;
+    }
+
+    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(World, 0);
+    if (!PlayerPawn)
+    {
+        return;
+    }
+
+    PlayerPawn->SetActorLocation(FVector(-420.0f, 0.0f, 120.0f));
+    PlayerPawn->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
 }
 
 void AGlitch459PMGameMode::SeedNarrativeData()

@@ -167,6 +167,8 @@ public:
     bool TryCompleteSelectedTask();
 
 private:
+    void EnsurePlayableSpace();
+    void PositionPlayerForPlay() const;
     void TickLoopSecond();
     void ResetLoop();
     void SeedNarrativeData();
@@ -324,6 +326,12 @@ private:
 
     UPROPERTY()
     FString LastLoopReview;
+
+    UPROPERTY()
+    TObjectPtr<class AActor> SpawnedOfficeShell;
+
+    UPROPERTY()
+    TObjectPtr<class AGlitch459PMStatusTerminal> SpawnedStatusTerminal;
 
     FTimerHandle LoopTimerHandle;
 };
