@@ -21,7 +21,7 @@ void AGlitch459PMGameMode::BeginPlay()
     SeedTaskPools();
 
     CurrentRoomId = TEXT("breakroom");
-    LastInspectionText = TEXT("Friday, 4:59 PM. Your badge still works. For now.");
+    LastInspectionText = TEXT("Friday, 4:57 PM. Three minutes to freedom. Your badge still works. For now.");
 
     PickNextAnomaly();
     GeneratePremonition();
@@ -591,18 +591,27 @@ void AGlitch459PMGameMode::ResetLoop()
     BuildLoopTasks();
     ApplyNarrativeBeatForLoop();
 
-    LastInspectionText = TEXT("The second hand hits 12. You blink, and the office resets to 4:59:00 PM.");
-    AddLog(TEXT("The second hand hits 12. You blink. The clock snaps back to 4:59:00."));
+    LastInspectionText = TEXT("The second hand slips past 4:59:59. You blink, and the office resets to 4:57:00 PM.");
+    AddLog(TEXT("The second hand reaches 5:00. You blink. The clock snaps back to 4:57:00."));
 }
 
 FString AGlitch459PMGameMode::GetClockText() const
 {
-    return FString::Printf(TEXT("4:59:%02d PM"), CurrentSecond);
+    constexpr int32 StartHour = 4;
+    constexpr int32 StartMinute = 57;
+
+    const int32 TotalSeconds = (StartHour * 3600) + (StartMinute * 60) + CurrentSecond;
+    const int32 DisplayHour24 = (TotalSeconds / 3600) % 24;
+    const int32 DisplayMinute = (TotalSeconds / 60) % 60;
+    const int32 DisplaySecond = TotalSeconds % 60;
+    const int32 DisplayHour12 = ((DisplayHour24 + 11) % 12) + 1;
+
+    return FString::Printf(TEXT("%d:%02d:%02d PM"), DisplayHour12, DisplayMinute, DisplaySecond);
 }
 
 int32 AGlitch459PMGameMode::GetEffectiveLoopDuration() const
 {
-    return FMath::Clamp(LoopDurationSeconds - (PressureLevel * 4), 36, LoopDurationSeconds);
+    return FMath::Clamp(LoopDurationSeconds - (PressureLevel * 12), 120, LoopDurationSeconds);
 }
 
 int32 AGlitch459PMGameMode::GetSecondsRemaining() const

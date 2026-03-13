@@ -231,7 +231,7 @@ private:
     int32 RequiredAnomalies = 5;
 
     UPROPERTY(EditDefaultsOnly)
-    int32 LoopDurationSeconds = 60;
+    int32 LoopDurationSeconds = 180;
 
     UPROPERTY(EditDefaultsOnly)
     int32 MaxOverloadStrikes = 3;

@@ -2,7 +2,7 @@
 
 The 4:59 PM Glitch (Psychological Horror)
 
-In this first-person narrative game, you are an office worker waiting for the clock to strike 5:00 PM so you can start your weekend. But every time the second hand hits 12, the clock resets to 4:59:00.
+In this first-person narrative game, you are an office worker waiting for the clock to strike 5:00 PM so you can start your weekend. But every time the clock reaches 5:00, the office snaps back to 4:57:00.
 
 The Hook: The office starts to distort. The water cooler grows tentacles, coworkers repeat the same banal jokes until they become screams, and the exit doors lead back into the breakroom.
 
@@ -24,8 +24,8 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 
 ### Gameplay Loop
 
-- Time starts at `4:59:00 PM` and advances each second.
-- At `4:59:59 -> 4:59:00`, the loop resets.
+- Time starts at `4:57:00 PM` and advances each second.
+- At `4:59:59 -> 4:57:00`, the loop resets.
 - One anomaly is active each loop.
 - Correctly flag anomalies to stabilize reality.
 - Complete loop tasks from Arthur's "Final Friday Report" board.
@@ -48,7 +48,7 @@ This repository now contains an Unreal Engine C++ implementation (UE 5.6.1).
 - **Escalating Atmosphere Text**: room descriptions react to both stage and pressure level.
 - **Intercom Intrusions**: pressure and late loops trigger boss voice interruptions with personalized taunts.
 - **Branching End States**: true Saturday escape, corporate "promotion" trap ending, and overload collapse failure.
-- **Adaptive Loop Duration**: rising pressure shortens the loop timer, increasing urgency and route planning demands.
+- **Adaptive Loop Duration**: rising pressure can compress the three-minute loop down to two minutes, increasing urgency and route planning demands.
 - **Reachability-Safe Task Picks**: loop task generation now favors objectives the player can actually reach in that loop.
 - **Memory Fragments**: inspect late-loop objects to recover Arthur's personal memories and unlock a superior ending path.
 - **Premonitions**: each loop starts with a hint about reality drift; low pressure gives reliable clues, high pressure corrupts them.
