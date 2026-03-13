@@ -84,5 +84,5 @@ void AGlitch459PMOfficeShell::ConfigureSurface(UStaticMeshComponent* MeshCompone
     MeshComponent->SetRelativeLocation(RelativeLocation);
     MeshComponent->SetRelativeRotation(RelativeRotation);
     MeshComponent->SetRelativeScale3D(RelativeScale);
-    MeshComponent->SetMobility(EComponentMobility::Static);
+    MeshComponent->SetMobility(EComponentMobility::Movable);
 }
