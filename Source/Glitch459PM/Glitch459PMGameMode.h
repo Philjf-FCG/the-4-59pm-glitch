@@ -149,6 +149,7 @@ public:
     bool IsIntercomActiveThisLoop() const { return bIntercomActiveThisLoop; }
     FString GetCurrentPremonition() const { return CurrentPremonition; }
     FString GetCurrentDirective() const { return CurrentDirectiveText; }
+    FString GetLastLoopReview() const { return LastLoopReview; }
     FString GetSelectedTaskPrompt() const;
     bool IsSelectedTaskCompleted() const;
 
@@ -311,6 +312,9 @@ private:
 
     UPROPERTY()
     bool bDirectiveCompletedThisLoop = false;
+
+    UPROPERTY()
+    FString LastLoopReview;
 
     FTimerHandle LoopTimerHandle;
 };

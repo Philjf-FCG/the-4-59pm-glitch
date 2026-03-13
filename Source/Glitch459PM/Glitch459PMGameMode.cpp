@@ -671,8 +671,28 @@ void AGlitch459PMGameMode::TickLoopSecond()
 
 void AGlitch459PMGameMode::ResetLoop()
 {
+    int32 CompletedThisLoop = 0;
+    for (const FGlitchTask& Task : CurrentLoopTasks)
+    {
+        if (Task.bCompleted)
+        {
+            ++CompletedThisLoop;
+        }
+    }
+
+    const int32 PreviousPressure = PressureLevel;
     EvaluateDirectiveOutcome();
     EvaluateLoopPressure();
+
+    LastLoopReview = FString::Printf(
+        TEXT("Review: tasks %d, anomaly %s, directive %s, pressure %d->%d"),
+        CompletedThisLoop,
+        bAnomalyFlaggedThisLoop ? TEXT("YES") : TEXT("NO"),
+        bDirectiveCompletedThisLoop ? TEXT("MET") : TEXT("MISSED"),
+        PreviousPressure,
+        PressureLevel
+    );
+    AddLog(LastLoopReview);
 
     if (PressureLevel >= 5)
     {
@@ -810,7 +830,8 @@ FString AGlitch459PMGameMode::GetTerminalStatusText() const
     const FString OutcomeHint = CollectedFragments.Num() >= RequiredFragments
         ? TEXT("MEMORY RESTORED")
         : TEXT("MEMORY INCOMPLETE");
-    const FString TerminalFooter = CurrentDirectiveText + TEXT("\n") + OutcomeHint;
+    const FString ReviewLine = LastLoopReview.IsEmpty() ? TEXT("NO PRIOR LOOP REVIEW") : LastLoopReview;
+    const FString TerminalFooter = CurrentDirectiveText + TEXT("\n") + OutcomeHint + TEXT("\n") + ReviewLine;
 
     return FString::Printf(
         TEXT("FINAL FRIDAY REPORT TERMINAL\nTIME %s\nLOOP %d\nPRESSURE %d/5\nANOMALIES %d/%d\nFRAGMENTS %d/%d\nINTERCOM %s\n%s\n%s"),
