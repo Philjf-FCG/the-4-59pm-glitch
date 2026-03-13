@@ -136,6 +136,7 @@ public:
     int32 GetCollectedFragmentCount() const { return CollectedFragments.Num(); }
     int32 GetRequiredFragmentCount() const { return RequiredFragments; }
     bool IsIntercomActiveThisLoop() const { return bIntercomActiveThisLoop; }
+    FString GetCurrentPremonition() const { return CurrentPremonition; }
     FString GetSelectedTaskPrompt() const;
     bool IsSelectedTaskCompleted() const;
 
@@ -161,6 +162,7 @@ private:
     void ApplyNarrativeBeatForLoop();
     void EvaluateLoopPressure();
     void HandleIntercomWhisper();
+    void GeneratePremonition();
     void AddLog(const FString& Message);
     void PickNextAnomaly();
     const FGlitchRoom* GetCurrentRoom() const;
@@ -278,6 +280,9 @@ private:
 
     UPROPERTY()
     int32 LastIntercomLineIndex = INDEX_NONE;
+
+    UPROPERTY()
+    FString CurrentPremonition;
 
     FTimerHandle LoopTimerHandle;
 };

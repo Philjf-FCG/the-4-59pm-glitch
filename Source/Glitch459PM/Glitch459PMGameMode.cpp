@@ -24,6 +24,7 @@ void AGlitch459PMGameMode::BeginPlay()
     LastInspectionText = TEXT("Friday, 4:59 PM. Your badge still works. For now.");
 
     PickNextAnomaly();
+    GeneratePremonition();
     BuildLoopTasks();
 
     AddLog(TEXT("Arthur, final reminder: finish the Final Friday Report before 5:00 PM to secure your promotion."));
@@ -505,6 +506,38 @@ void AGlitch459PMGameMode::HandleIntercomWhisper()
     NextIntercomSecond = FMath::Min(CurrentSecond + NextGap, EffectiveDuration - 2);
 }
 
+void AGlitch459PMGameMode::GeneratePremonition()
+{
+    const FGlitchAnomaly* Anomaly = GetCurrentAnomaly();
+    if (!Anomaly)
+    {
+        CurrentPremonition = TEXT("No premonition this loop.");
+        return;
+    }
+
+    const FGlitchRoom* AnomalyRoom = Rooms.Find(Anomaly->RoomId);
+    const FString RoomName = AnomalyRoom ? AnomalyRoom->DisplayName : Anomaly->RoomId.ToString();
+
+    const bool bReliable = PressureLevel <= 2;
+    if (bReliable)
+    {
+        CurrentPremonition = FString::Printf(TEXT("Premonition: %s"), *Anomaly->Clue);
+        AddLog(FString::Printf(TEXT("A lucid shiver points toward %s."), *RoomName));
+        return;
+    }
+
+    const TArray<FString> DistortedHints = {
+        TEXT("The breakroom hums in a language made of invoices."),
+        TEXT("The hallway wants you to walk in circles until compliant."),
+        TEXT("The lobby doors are dreaming about being walls."),
+        TEXT("Someone in cubicles is laughing on the wrong timeline."),
+        TEXT("The server room sounds like rain inside a metal skull.")
+    };
+
+    CurrentPremonition = DistortedHints[FMath::RandRange(0, DistortedHints.Num() - 1)];
+    AddLog(TEXT("Your premonition arrives scrambled by panic."));
+}
+
 void AGlitch459PMGameMode::TickLoopSecond()
 {
     if (HasEnded())
@@ -554,6 +587,7 @@ void AGlitch459PMGameMode::ResetLoop()
     NextIntercomSecond = FMath::Min(18 + FMath::RandRange(0, 8), GetEffectiveLoopDuration() - 2);
 
     PickNextAnomaly();
+    GeneratePremonition();
     BuildLoopTasks();
     ApplyNarrativeBeatForLoop();
 

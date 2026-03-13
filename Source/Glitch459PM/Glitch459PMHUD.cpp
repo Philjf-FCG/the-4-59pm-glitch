@@ -68,6 +68,16 @@ void AGlitch459PMHUD::DrawHUD()
     );
     Y += 24.0f;
 
+    DrawText(
+        GameMode->GetCurrentPremonition(),
+        FLinearColor(0.86f, 0.82f, 0.98f),
+        X,
+        Y,
+        Font,
+        0.95f
+    );
+    Y += 24.0f;
+
     DrawText(FString::Printf(TEXT("Room: %s"), *GameMode->GetCurrentRoomName()), FLinearColor::White, X, Y, Font, 1.1f);
     Y += 24.0f;
     DrawText(GameMode->GetCurrentRoomDescription(), FLinearColor(0.84f, 0.9f, 0.87f), X, Y, Font, 1.0f);
