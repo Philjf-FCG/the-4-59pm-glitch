@@ -5,13 +5,15 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Glitch459PMGameMode.h"
+#include "Engine/World.h"
 #include "Materials/MaterialInterface.h"
 #include "Sound/SoundBase.h"
 #include "UObject/ConstructorHelpers.h"
 
 AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
 
     SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
     SetRootComponent(SceneRoot);
@@ -117,6 +119,12 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     RoomAudio->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 }
 
+void AGlitch459PMOfficeShell::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    RefreshAtmosphere(DeltaSeconds);
+}
+
 void AGlitch459PMOfficeShell::ConfigureSurface(UStaticMeshComponent* MeshComponent, const FVector& RelativeLocation, const FVector& RelativeScale, const FRotator& RelativeRotation) const
 {
     if (!MeshComponent)
@@ -128,4 +136,33 @@ void AGlitch459PMOfficeShell::ConfigureSurface(UStaticMeshComponent* MeshCompone
     MeshComponent->SetRelativeRotation(RelativeRotation);
     MeshComponent->SetRelativeScale3D(RelativeScale);
     MeshComponent->SetMobility(EComponentMobility::Movable);
+}
+
+void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
+{
+    UWorld* World = GetWorld();
+    AGlitch459PMGameMode* GameMode = World ? Cast<AGlitch459PMGameMode>(World->GetAuthGameMode()) : nullptr;
+    if (!GameMode)
+    {
+        return;
+    }
+
+    AtmospherePhase += DeltaSeconds * (1.2f + (0.35f * GameMode->GetPressureLevel()));
+    const float Flicker = 0.5f + (0.5f * FMath::Sin(AtmospherePhase));
+    const float PressureAlpha = static_cast<float>(GameMode->GetPressureLevel()) / 5.0f;
+
+    const float LightIntensity = 9000.0f + (2600.0f * Flicker) - (2200.0f * PressureAlpha);
+    OverheadLight->SetIntensity(FMath::Max(LightIntensity, 4200.0f));
+
+    const FLinearColor CalmColor(1.0f, 0.96f, 0.84f);
+    const FLinearColor PanicColor(1.0f, 0.74f, 0.62f);
+    const FLinearColor MixedColor = FMath::Lerp(CalmColor, PanicColor, PressureAlpha);
+    OverheadLight->SetLightColor(MixedColor.ToFColor(true));
+
+    const FString LabelText = FString::Printf(TEXT("%s\nPressure %d/5"), *GameMode->GetCurrentRoomName().ToUpper(), GameMode->GetPressureLevel());
+    RoomLabel->SetText(FText::FromString(LabelText));
+    RoomLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(1.0f, 0.92f, 0.7f), FLinearColor(1.0f, 0.58f, 0.58f), PressureAlpha).ToFColor(true));
+
+    RoomAudio->SetVolumeMultiplier(0.22f + (0.1f * PressureAlpha));
+    RoomAudio->SetPitchMultiplier(0.62f + (0.06f * PressureAlpha));
 }

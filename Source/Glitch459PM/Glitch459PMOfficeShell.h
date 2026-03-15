@@ -12,6 +12,8 @@ class GLITCH459PM_API AGlitch459PMOfficeShell : public AActor
 public:
     AGlitch459PMOfficeShell();
 
+    virtual void Tick(float DeltaSeconds) override;
+
 private:
     UPROPERTY(VisibleAnywhere)
     class USceneComponent* SceneRoot;
@@ -46,5 +48,8 @@ private:
     UPROPERTY(VisibleAnywhere)
     class UAudioComponent* RoomAudio;
 
+    float AtmospherePhase = 0.0f;
+
     void ConfigureSurface(class UStaticMeshComponent* MeshComponent, const FVector& RelativeLocation, const FVector& RelativeScale, const FRotator& RelativeRotation = FRotator::ZeroRotator) const;
+    void RefreshAtmosphere(float DeltaSeconds);
 };
