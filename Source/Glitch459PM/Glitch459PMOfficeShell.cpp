@@ -47,8 +47,20 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     RoomLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("RoomLabel"));
     RoomLabel->SetupAttachment(SceneRoot);
 
+    ObjectLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("ObjectLabel"));
+    ObjectLabel->SetupAttachment(SceneRoot);
+
+    ExitLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("ExitLabel"));
+    ExitLabel->SetupAttachment(SceneRoot);
+
+    DirectiveLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("DirectiveLabel"));
+    DirectiveLabel->SetupAttachment(SceneRoot);
+
     OverheadLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("OverheadLight"));
     OverheadLight->SetupAttachment(SceneRoot);
+
+    FocusLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("FocusLight"));
+    FocusLight->SetupAttachment(SceneRoot);
 
     RoomAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("RoomAudio"));
     RoomAudio->SetupAttachment(SceneRoot);
@@ -111,10 +123,37 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     RoomLabel->SetWorldSize(48.0f);
     RoomLabel->SetTextRenderColor(FColor(255, 235, 180));
 
+    ObjectLabel->SetRelativeLocation(FVector(-320.0f, -240.0f, 112.0f));
+    ObjectLabel->SetRelativeRotation(FRotator(0.0f, 35.0f, 0.0f));
+    ObjectLabel->SetHorizontalAlignment(EHorizTextAligment::EHTA_Left);
+    ObjectLabel->SetText(FText::FromString(TEXT("OBJECT")));
+    ObjectLabel->SetWorldSize(28.0f);
+    ObjectLabel->SetTextRenderColor(FColor(175, 215, 255));
+
+    ExitLabel->SetRelativeLocation(FVector(420.0f, 250.0f, 112.0f));
+    ExitLabel->SetRelativeRotation(FRotator(0.0f, -145.0f, 0.0f));
+    ExitLabel->SetHorizontalAlignment(EHorizTextAligment::EHTA_Left);
+    ExitLabel->SetText(FText::FromString(TEXT("EXIT")));
+    ExitLabel->SetWorldSize(28.0f);
+    ExitLabel->SetTextRenderColor(FColor(165, 255, 205));
+
+    DirectiveLabel->SetRelativeLocation(FVector(0.0f, -520.0f, 220.0f));
+    DirectiveLabel->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+    DirectiveLabel->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+    DirectiveLabel->SetText(FText::FromString(TEXT("DIRECTIVE")));
+    DirectiveLabel->SetWorldSize(24.0f);
+    DirectiveLabel->SetTextRenderColor(FColor(255, 220, 170));
+
     OverheadLight->SetRelativeLocation(FVector(0.0f, 0.0f, 320.0f));
     OverheadLight->SetIntensity(12000.0f);
     OverheadLight->SetLightColor(FColor(255, 244, 214));
     OverheadLight->AttenuationRadius = 2600.0f;
+
+    FocusLight->SetRelativeLocation(FVector(-150.0f, -40.0f, 150.0f));
+    FocusLight->SetIntensity(2400.0f);
+    FocusLight->SetLightColor(FColor(145, 210, 255));
+    FocusLight->AttenuationRadius = 460.0f;
+    FocusLight->SetCastShadows(false);
 
     RoomAudio->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 }
@@ -162,6 +201,19 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
     const FString LabelText = FString::Printf(TEXT("%s\nPressure %d/5"), *GameMode->GetCurrentRoomName().ToUpper(), GameMode->GetPressureLevel());
     RoomLabel->SetText(FText::FromString(LabelText));
     RoomLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(1.0f, 0.92f, 0.7f), FLinearColor(1.0f, 0.58f, 0.58f), PressureAlpha).ToFColor(true));
+
+    ObjectLabel->SetText(FText::FromString(FString::Printf(TEXT("OBJECT\n%s"), *GameMode->GetSelectedObjectName().ToUpper())));
+    ObjectLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(0.68f, 0.86f, 1.0f), FLinearColor(0.95f, 0.7f, 0.7f), PressureAlpha).ToFColor(true));
+
+    ExitLabel->SetText(FText::FromString(FString::Printf(TEXT("EXIT\n%s"), *GameMode->GetSelectedExitLabel().ToUpper())));
+    ExitLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(0.72f, 1.0f, 0.84f), FLinearColor(1.0f, 0.78f, 0.62f), PressureAlpha).ToFColor(true));
+
+    DirectiveLabel->SetText(FText::FromString(GameMode->GetCurrentDirective().ToUpper()));
+    DirectiveLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(1.0f, 0.9f, 0.72f), FLinearColor(1.0f, 0.64f, 0.64f), PressureAlpha).ToFColor(true));
+
+    const float FocusPulse = 0.5f + (0.5f * FMath::Sin(AtmospherePhase * 1.6f));
+    FocusLight->SetIntensity(1500.0f + (1400.0f * FocusPulse) + (500.0f * PressureAlpha));
+    FocusLight->SetLightColor(FMath::Lerp(FLinearColor(0.55f, 0.8f, 1.0f), FLinearColor(1.0f, 0.55f, 0.55f), PressureAlpha).ToFColor(true));
 
     RoomAudio->SetVolumeMultiplier(0.22f + (0.1f * PressureAlpha));
     RoomAudio->SetPitchMultiplier(0.62f + (0.06f * PressureAlpha));

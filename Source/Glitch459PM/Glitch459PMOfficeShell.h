@@ -43,7 +43,19 @@ private:
     class UTextRenderComponent* RoomLabel;
 
     UPROPERTY(VisibleAnywhere)
+    class UTextRenderComponent* ObjectLabel;
+
+    UPROPERTY(VisibleAnywhere)
+    class UTextRenderComponent* ExitLabel;
+
+    UPROPERTY(VisibleAnywhere)
+    class UTextRenderComponent* DirectiveLabel;
+
+    UPROPERTY(VisibleAnywhere)
     class UPointLightComponent* OverheadLight;
+
+    UPROPERTY(VisibleAnywhere)
+    class UPointLightComponent* FocusLight;
 
     UPROPERTY(VisibleAnywhere)
     class UAudioComponent* RoomAudio;
