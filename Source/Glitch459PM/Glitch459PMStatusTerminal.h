@@ -37,6 +37,9 @@ private:
     class UTextRenderComponent* ScreenText;
 
     UPROPERTY(VisibleAnywhere)
+    class UPointLightComponent* ScreenGlow;
+
+    UPROPERTY(VisibleAnywhere)
     class UAudioComponent* TerminalAudio;
 
     UPROPERTY(EditAnywhere, Category = "Terminal")
@@ -45,7 +48,17 @@ private:
     UPROPERTY(EditAnywhere, Category = "Terminal")
     FString FallbackText = TEXT("TERMINAL OFFLINE");
 
+    UPROPERTY(EditAnywhere, Category = "Terminal")
+    float FlickerSpeed = 3.5f;
+
+    UPROPERTY(EditAnywhere, Category = "Terminal")
+    float BaseGlowIntensity = 900.0f;
+
+    UPROPERTY(EditAnywhere, Category = "Terminal")
+    float FlickerIntensityRange = 260.0f;
+
     float TimeSinceRefresh = 0.0f;
+    float FlickerPhase = 0.0f;
 
     void RefreshScreen();
 };

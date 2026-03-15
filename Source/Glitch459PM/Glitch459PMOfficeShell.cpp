@@ -53,6 +53,15 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     RoomAudio->bAutoActivate = true;
     RoomAudio->SetVolumeMultiplier(0.28f);
     RoomAudio->SetPitchMultiplier(0.6f);
+    RoomAudio->bAllowSpatialization = true;
+    RoomAudio->bOverrideAttenuation = true;
+    RoomAudio->AttenuationOverrides.bAttenuate = true;
+    RoomAudio->AttenuationOverrides.bSpatialize = true;
+    RoomAudio->AttenuationOverrides.AttenuationShapeExtents = FVector(420.0f, 0.0f, 0.0f);
+    RoomAudio->AttenuationOverrides.FalloffDistance = 2200.0f;
+    RoomAudio->AttenuationOverrides.dBAttenuationAtMax = -24.0f;
+    RoomAudio->AttenuationOverrides.LPFRadiusMin = 320.0f;
+    RoomAudio->AttenuationOverrides.LPFRadiusMax = 2200.0f;
 
     if (CubeMesh.Succeeded())
     {

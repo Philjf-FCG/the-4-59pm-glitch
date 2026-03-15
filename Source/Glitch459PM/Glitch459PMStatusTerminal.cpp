@@ -1,6 +1,7 @@
 #include "Glitch459PMStatusTerminal.h"
 
 #include "Components/AudioComponent.h"
+#include "Components/PointLightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
@@ -52,12 +53,29 @@ AGlitch459PMStatusTerminal::AGlitch459PMStatusTerminal()
     ScreenText->SetTextRenderColor(FColor(125, 255, 145));
     ScreenText->SetText(FText::FromString(FallbackText));
 
+    ScreenGlow = CreateDefaultSubobject<UPointLightComponent>(TEXT("ScreenGlow"));
+    ScreenGlow->SetupAttachment(SceneRoot);
+    ScreenGlow->SetRelativeLocation(FVector(44.0f, 0.0f, 80.0f));
+    ScreenGlow->SetIntensity(BaseGlowIntensity);
+    ScreenGlow->SetLightColor(FColor(125, 255, 145));
+    ScreenGlow->AttenuationRadius = 280.0f;
+    ScreenGlow->SetCastShadows(false);
+
     TerminalAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("TerminalAudio"));
     TerminalAudio->SetupAttachment(SceneRoot);
     TerminalAudio->SetRelativeLocation(FVector(24.0f, 0.0f, 62.0f));
     TerminalAudio->bAutoActivate = true;
     TerminalAudio->SetVolumeMultiplier(0.16f);
     TerminalAudio->SetPitchMultiplier(0.85f);
+    TerminalAudio->bAllowSpatialization = true;
+    TerminalAudio->bOverrideAttenuation = true;
+    TerminalAudio->AttenuationOverrides.bAttenuate = true;
+    TerminalAudio->AttenuationOverrides.bSpatialize = true;
+    TerminalAudio->AttenuationOverrides.AttenuationShapeExtents = FVector(80.0f, 0.0f, 0.0f);
+    TerminalAudio->AttenuationOverrides.FalloffDistance = 900.0f;
+    TerminalAudio->AttenuationOverrides.dBAttenuationAtMax = -36.0f;
+    TerminalAudio->AttenuationOverrides.LPFRadiusMin = 100.0f;
+    TerminalAudio->AttenuationOverrides.LPFRadiusMax = 900.0f;
 
     if (CubeMesh.Succeeded())
     {
@@ -94,6 +112,15 @@ void AGlitch459PMStatusTerminal::BeginPlay()
 void AGlitch459PMStatusTerminal::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+
+    FlickerPhase += DeltaSeconds * FlickerSpeed;
+    const float Flicker = 0.5f + 0.5f * FMath::Sin(FlickerPhase);
+    const float Jitter = FMath::FRandRange(-0.08f, 0.08f);
+    const float GlowIntensity = BaseGlowIntensity + (FlickerIntensityRange * (Flicker + Jitter));
+    ScreenGlow->SetIntensity(FMath::Max(GlowIntensity, 120.0f));
+
+    const float Green = FMath::Clamp(0.72f + (0.28f * Flicker), 0.6f, 1.0f);
+    ScreenText->SetTextRenderColor(FLinearColor(0.52f, Green, 0.58f, 1.0f).ToFColor(true));
 
     TimeSinceRefresh += DeltaSeconds;
     if (TimeSinceRefresh >= RefreshInterval)
