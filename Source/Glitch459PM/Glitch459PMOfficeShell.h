@@ -58,10 +58,16 @@ private:
     class UTextRenderComponent* PremonitionLabel;
 
     UPROPERTY(VisibleAnywhere)
+    class UTextRenderComponent* StatusLabel;
+
+    UPROPERTY(VisibleAnywhere)
     class UPointLightComponent* OverheadLight;
 
     UPROPERTY(VisibleAnywhere)
     class UPointLightComponent* FocusLight;
+
+    UPROPERTY(VisibleAnywhere)
+    class UPointLightComponent* IntercomLight;
 
     UPROPERTY(VisibleAnywhere)
     class UAudioComponent* RoomAudio;

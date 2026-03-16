@@ -62,11 +62,17 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     PremonitionLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("PremonitionLabel"));
     PremonitionLabel->SetupAttachment(SceneRoot);
 
+    StatusLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("StatusLabel"));
+    StatusLabel->SetupAttachment(SceneRoot);
+
     OverheadLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("OverheadLight"));
     OverheadLight->SetupAttachment(SceneRoot);
 
     FocusLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("FocusLight"));
     FocusLight->SetupAttachment(SceneRoot);
+
+    IntercomLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("IntercomLight"));
+    IntercomLight->SetupAttachment(SceneRoot);
 
     RoomAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("RoomAudio"));
     RoomAudio->SetupAttachment(SceneRoot);
@@ -164,6 +170,13 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     PremonitionLabel->SetWorldSize(20.0f);
     PremonitionLabel->SetTextRenderColor(FColor(205, 190, 255));
 
+    StatusLabel->SetRelativeLocation(FVector(500.0f, -340.0f, 145.0f));
+    StatusLabel->SetRelativeRotation(FRotator(0.0f, -120.0f, 0.0f));
+    StatusLabel->SetHorizontalAlignment(EHorizTextAligment::EHTA_Left);
+    StatusLabel->SetText(FText::FromString(TEXT("STATUS")));
+    StatusLabel->SetWorldSize(18.0f);
+    StatusLabel->SetTextRenderColor(FColor(255, 210, 170));
+
     OverheadLight->SetRelativeLocation(FVector(0.0f, 0.0f, 320.0f));
     OverheadLight->SetIntensity(12000.0f);
     OverheadLight->SetLightColor(FColor(255, 244, 214));
@@ -174,6 +187,12 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     FocusLight->SetLightColor(FColor(145, 210, 255));
     FocusLight->AttenuationRadius = 460.0f;
     FocusLight->SetCastShadows(false);
+
+    IntercomLight->SetRelativeLocation(FVector(500.0f, -260.0f, 220.0f));
+    IntercomLight->SetIntensity(0.0f);
+    IntercomLight->SetLightColor(FColor(255, 80, 80));
+    IntercomLight->AttenuationRadius = 320.0f;
+    IntercomLight->SetCastShadows(false);
 
     RoomAudio->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 }
@@ -236,6 +255,27 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
 
     PremonitionLabel->SetText(FText::FromString(GameMode->GetCurrentPremonition().ToUpper()));
     PremonitionLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(0.84f, 0.78f, 1.0f), FLinearColor(1.0f, 0.62f, 0.72f), PressureAlpha).ToFColor(true));
+
+    const bool bTaskDone = GameMode->IsSelectedTaskCompleted();
+    const float TaskPulse = 0.5f + (0.5f * FMath::Sin(AtmospherePhase * 2.6f));
+    const FLinearColor PendingTaskColor = FMath::Lerp(FLinearColor(1.0f, 0.86f, 0.72f), FLinearColor(1.0f, 0.72f, 0.72f), TaskPulse * 0.45f);
+    TaskLabel->SetTextRenderColor((bTaskDone ? FLinearColor(0.7f, 1.0f, 0.76f) : PendingTaskColor).ToFColor(true));
+
+    const bool bIntercomActive = GameMode->IsIntercomActiveThisLoop();
+    const float IntercomPulse = 0.5f + (0.5f * FMath::Sin(AtmospherePhase * 4.2f));
+    IntercomLight->SetIntensity(bIntercomActive ? (900.0f + (2000.0f * IntercomPulse)) : (120.0f + (260.0f * PressureAlpha)));
+    IntercomLight->SetLightColor((bIntercomActive
+        ? FLinearColor(1.0f, 0.32f, 0.32f)
+        : FMath::Lerp(FLinearColor(0.35f, 0.45f, 0.55f), FLinearColor(0.72f, 0.32f, 0.32f), PressureAlpha)).ToFColor(true));
+
+    const FString StatusText = FString::Printf(
+        TEXT("STATUS\nINTERCOM %s\nTASK %s\n%s"),
+        bIntercomActive ? TEXT("ACTIVE") : TEXT("QUIET"),
+        bTaskDone ? TEXT("DONE") : TEXT("PENDING"),
+        *GameMode->GetLastLoopReview().ToUpper()
+    );
+    StatusLabel->SetText(FText::FromString(StatusText));
+    StatusLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(0.95f, 0.84f, 0.72f), FLinearColor(1.0f, 0.62f, 0.62f), PressureAlpha).ToFColor(true));
 
     const float FocusPulse = 0.5f + (0.5f * FMath::Sin(AtmospherePhase * 1.6f));
     FocusLight->SetIntensity(1500.0f + (1400.0f * FocusPulse) + (500.0f * PressureAlpha));
