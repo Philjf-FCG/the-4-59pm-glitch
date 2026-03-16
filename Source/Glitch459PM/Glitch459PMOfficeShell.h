@@ -52,6 +52,12 @@ private:
     class UTextRenderComponent* DirectiveLabel;
 
     UPROPERTY(VisibleAnywhere)
+    class UTextRenderComponent* TaskLabel;
+
+    UPROPERTY(VisibleAnywhere)
+    class UTextRenderComponent* PremonitionLabel;
+
+    UPROPERTY(VisibleAnywhere)
     class UPointLightComponent* OverheadLight;
 
     UPROPERTY(VisibleAnywhere)

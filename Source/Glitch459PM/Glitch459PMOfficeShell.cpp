@@ -56,6 +56,12 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     DirectiveLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("DirectiveLabel"));
     DirectiveLabel->SetupAttachment(SceneRoot);
 
+    TaskLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TaskLabel"));
+    TaskLabel->SetupAttachment(SceneRoot);
+
+    PremonitionLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("PremonitionLabel"));
+    PremonitionLabel->SetupAttachment(SceneRoot);
+
     OverheadLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("OverheadLight"));
     OverheadLight->SetupAttachment(SceneRoot);
 
@@ -144,6 +150,20 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     DirectiveLabel->SetWorldSize(24.0f);
     DirectiveLabel->SetTextRenderColor(FColor(255, 220, 170));
 
+    TaskLabel->SetRelativeLocation(FVector(-470.0f, 260.0f, 180.0f));
+    TaskLabel->SetRelativeRotation(FRotator(0.0f, 55.0f, 0.0f));
+    TaskLabel->SetHorizontalAlignment(EHorizTextAligment::EHTA_Left);
+    TaskLabel->SetText(FText::FromString(TEXT("TASK BOARD")));
+    TaskLabel->SetWorldSize(20.0f);
+    TaskLabel->SetTextRenderColor(FColor(255, 210, 180));
+
+    PremonitionLabel->SetRelativeLocation(FVector(0.0f, 520.0f, 180.0f));
+    PremonitionLabel->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
+    PremonitionLabel->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+    PremonitionLabel->SetText(FText::FromString(TEXT("PREMONITION")));
+    PremonitionLabel->SetWorldSize(20.0f);
+    PremonitionLabel->SetTextRenderColor(FColor(205, 190, 255));
+
     OverheadLight->SetRelativeLocation(FVector(0.0f, 0.0f, 320.0f));
     OverheadLight->SetIntensity(12000.0f);
     OverheadLight->SetLightColor(FColor(255, 244, 214));
@@ -210,6 +230,12 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
 
     DirectiveLabel->SetText(FText::FromString(GameMode->GetCurrentDirective().ToUpper()));
     DirectiveLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(1.0f, 0.9f, 0.72f), FLinearColor(1.0f, 0.64f, 0.64f), PressureAlpha).ToFColor(true));
+
+    TaskLabel->SetText(FText::FromString(FString::Printf(TEXT("TASK BOARD\n%s"), *GameMode->GetSelectedTaskPrompt().ToUpper())));
+    TaskLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(1.0f, 0.84f, 0.72f), FLinearColor(1.0f, 0.66f, 0.66f), PressureAlpha).ToFColor(true));
+
+    PremonitionLabel->SetText(FText::FromString(GameMode->GetCurrentPremonition().ToUpper()));
+    PremonitionLabel->SetTextRenderColor(FMath::Lerp(FLinearColor(0.84f, 0.78f, 1.0f), FLinearColor(1.0f, 0.62f, 0.72f), PressureAlpha).ToFColor(true));
 
     const float FocusPulse = 0.5f + (0.5f * FMath::Sin(AtmospherePhase * 1.6f));
     FocusLight->SetIntensity(1500.0f + (1400.0f * FocusPulse) + (500.0f * PressureAlpha));
