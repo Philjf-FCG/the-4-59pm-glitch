@@ -107,6 +107,48 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     RoomAudio->AttenuationOverrides.LPFRadiusMin = 320.0f;
     RoomAudio->AttenuationOverrides.LPFRadiusMax = 2200.0f;
 
+    HVACAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("HVACAudio"));
+    HVACAudio->SetupAttachment(SceneRoot);
+    HVACAudio->bAutoActivate = true;
+    HVACAudio->SetRelativeLocation(FVector(-120.0f, 0.0f, 320.0f));
+    HVACAudio->SetVolumeMultiplier(0.14f);
+    HVACAudio->SetPitchMultiplier(0.78f);
+    HVACAudio->bAllowSpatialization = true;
+    HVACAudio->bOverrideAttenuation = true;
+    HVACAudio->AttenuationOverrides.bAttenuate = true;
+    HVACAudio->AttenuationOverrides.bSpatialize = true;
+    HVACAudio->AttenuationOverrides.AttenuationShapeExtents = FVector(260.0f, 0.0f, 0.0f);
+    HVACAudio->AttenuationOverrides.FalloffDistance = 2600.0f;
+    HVACAudio->AttenuationOverrides.dBAttenuationAtMax = -18.0f;
+
+    ClockAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("ClockAudio"));
+    ClockAudio->SetupAttachment(SceneRoot);
+    ClockAudio->bAutoActivate = true;
+    ClockAudio->SetRelativeLocation(FVector(0.0f, 540.0f, 250.0f));
+    ClockAudio->SetVolumeMultiplier(0.06f);
+    ClockAudio->SetPitchMultiplier(0.9f);
+    ClockAudio->bAllowSpatialization = true;
+    ClockAudio->bOverrideAttenuation = true;
+    ClockAudio->AttenuationOverrides.bAttenuate = true;
+    ClockAudio->AttenuationOverrides.bSpatialize = true;
+    ClockAudio->AttenuationOverrides.AttenuationShapeExtents = FVector(90.0f, 0.0f, 0.0f);
+    ClockAudio->AttenuationOverrides.FalloffDistance = 1800.0f;
+    ClockAudio->AttenuationOverrides.dBAttenuationAtMax = -26.0f;
+
+    FluorescentAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("FluorescentAudio"));
+    FluorescentAudio->SetupAttachment(SceneRoot);
+    FluorescentAudio->bAutoActivate = true;
+    FluorescentAudio->SetRelativeLocation(FVector(0.0f, 0.0f, 340.0f));
+    FluorescentAudio->SetVolumeMultiplier(0.09f);
+    FluorescentAudio->SetPitchMultiplier(0.96f);
+    FluorescentAudio->bAllowSpatialization = true;
+    FluorescentAudio->bOverrideAttenuation = true;
+    FluorescentAudio->AttenuationOverrides.bAttenuate = true;
+    FluorescentAudio->AttenuationOverrides.bSpatialize = true;
+    FluorescentAudio->AttenuationOverrides.AttenuationShapeExtents = FVector(220.0f, 0.0f, 0.0f);
+    FluorescentAudio->AttenuationOverrides.FalloffDistance = 1800.0f;
+    FluorescentAudio->AttenuationOverrides.dBAttenuationAtMax = -20.0f;
+
     IntercomBedAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("IntercomBedAudio"));
     IntercomBedAudio->SetupAttachment(SceneRoot);
     IntercomBedAudio->bAutoActivate = false;
@@ -197,6 +239,9 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     if (AmbientSound.Succeeded())
     {
         RoomAudio->SetSound(AmbientSound.Object);
+        HVACAudio->SetSound(LoadLoopOrFallback(HVACLoopAssetPath, AmbientSound.Object));
+        ClockAudio->SetSound(LoadLoopOrFallback(ClockLoopAssetPath, AmbientSound.Object));
+        FluorescentAudio->SetSound(LoadLoopOrFallback(FluorescentLoopAssetPath, AmbientSound.Object));
     }
 
     if (IntercomStinger.Succeeded())
@@ -440,6 +485,19 @@ FString AGlitch459PMOfficeShell::BuildIntercomVoiceAssetPath(FName VoiceKey) con
     return FString::Printf(TEXT("%s/%s.%s"), *IntercomVoiceAssetRoot, *AssetName, *AssetName);
 }
 
+USoundBase* AGlitch459PMOfficeShell::LoadLoopOrFallback(const FString& AssetPath, USoundBase* FallbackSound) const
+{
+    if (!AssetPath.IsEmpty())
+    {
+        if (USoundBase* LoadedSound = LoadObject<USoundBase>(nullptr, *AssetPath))
+        {
+            return LoadedSound;
+        }
+    }
+
+    return FallbackSound;
+}
+
 void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
 {
     UWorld* World = GetWorld();
@@ -457,6 +515,12 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
     const int32 CurrentPressure = GameMode->GetPressureLevel();
     const bool bIntercomActive = GameMode->IsIntercomActiveThisLoop();
     const int32 CurrentIntercomEventCount = GameMode->GetIntercomEventCount();
+    const int32 CurrentReportEventCount = GameMode->GetReportEventCount();
+    const int32 CurrentMissedAnomalyEventCount = GameMode->GetMissedAnomalyEventCount();
+    const float PressureAlpha = static_cast<float>(CurrentPressure) / 5.0f;
+    const float LoopProgress = 1.0f - (static_cast<float>(GameMode->GetSecondsRemaining()) / static_cast<float>(FMath::Max(GameMode->GetEffectiveLoopDuration(), 1)));
+    const float UrgencyAlpha = FMath::Clamp((LoopProgress - 0.72f) / 0.28f, 0.0f, 1.0f);
+    const FString CurrentRoomName = GameMode->GetCurrentRoomName();
 
     if (bIntercomActive && !bWasIntercomActive)
     {
@@ -478,6 +542,90 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
         }
     }
 
+    if (CurrentReportEventCount > LastReportEventCount)
+    {
+        const bool bCorrectReport = GameMode->WasLastReportCorrect();
+        const EGlitchAnomalyClass AnomalyClass = GameMode->GetLastReportedAnomalyClass();
+        const FName ReportedRoomId = GameMode->GetLastReportedRoomId();
+
+        float PitchShift = bCorrectReport ? 1.0f : 0.76f;
+        float Volume = bCorrectReport ? 0.34f : 0.45f;
+
+        switch (AnomalyClass)
+        {
+        case EGlitchAnomalyClass::Temporal:
+            PitchShift += bCorrectReport ? 0.16f : -0.06f;
+            break;
+        case EGlitchAnomalyClass::Organic:
+            PitchShift += bCorrectReport ? -0.02f : -0.1f;
+            Volume += 0.04f;
+            break;
+        case EGlitchAnomalyClass::Surveillance:
+            PitchShift += bCorrectReport ? 0.08f : -0.12f;
+            break;
+        case EGlitchAnomalyClass::Spatial:
+            PitchShift += bCorrectReport ? 0.04f : -0.15f;
+            break;
+        case EGlitchAnomalyClass::Intercom:
+            PitchShift += bCorrectReport ? -0.05f : -0.18f;
+            Volume += 0.06f;
+            break;
+        case EGlitchAnomalyClass::Identity:
+            PitchShift += bCorrectReport ? 0.02f : -0.14f;
+            Volume += 0.03f;
+            break;
+        default:
+            break;
+        }
+
+        if (ReportedRoomId == TEXT("server_room"))
+        {
+            PitchShift -= 0.06f;
+            Volume += 0.04f;
+        }
+        else if (ReportedRoomId == TEXT("archive"))
+        {
+            PitchShift -= 0.1f;
+        }
+
+        PlayReactiveStinger(
+            bCorrectReport ? PressureStingerSound.Get() : IntercomStingerSound.Get(),
+            bCorrectReport ? FocusLight->GetComponentLocation() : IntercomLight->GetComponentLocation(),
+            FMath::Clamp(Volume, 0.2f, 0.62f),
+            FMath::Clamp(PitchShift, 0.56f, 1.28f)
+        );
+    }
+
+    if (CurrentMissedAnomalyEventCount > LastMissedAnomalyEventCount)
+    {
+        const EGlitchAnomalyClass MissedClass = GameMode->GetLastMissedAnomalyClass();
+        float MissedPitch = 0.66f;
+        float MissedVolume = 0.42f;
+
+        switch (MissedClass)
+        {
+        case EGlitchAnomalyClass::Temporal:
+            MissedPitch = 0.74f;
+            break;
+        case EGlitchAnomalyClass::Intercom:
+            MissedPitch = 0.61f;
+            MissedVolume = 0.5f;
+            break;
+        case EGlitchAnomalyClass::Spatial:
+            MissedPitch = 0.64f;
+            MissedVolume = 0.46f;
+            break;
+        case EGlitchAnomalyClass::Identity:
+            MissedPitch = 0.63f;
+            MissedVolume = 0.47f;
+            break;
+        default:
+            break;
+        }
+
+        PlayReactiveStinger(PressureStingerSound.Get(), OverheadLight->GetComponentLocation(), MissedVolume, MissedPitch);
+    }
+
     if (!bIntercomActive)
     {
         IntercomBedAudio->Stop();
@@ -492,10 +640,11 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
     bWasIntercomActive = bIntercomActive;
     LastAudioPressureLevel = CurrentPressure;
     LastIntercomEventCount = CurrentIntercomEventCount;
+    LastReportEventCount = CurrentReportEventCount;
+    LastMissedAnomalyEventCount = CurrentMissedAnomalyEventCount;
 
     AtmospherePhase += DeltaSeconds * (1.2f + (0.35f * GameMode->GetPressureLevel()));
     const float Flicker = 0.5f + (0.5f * FMath::Sin(AtmospherePhase));
-    const float PressureAlpha = static_cast<float>(GameMode->GetPressureLevel()) / 5.0f;
 
     const float LightIntensity = 9000.0f + (2600.0f * Flicker) - (2200.0f * PressureAlpha);
     OverheadLight->SetIntensity(FMath::Max(LightIntensity, 4200.0f));
@@ -549,7 +698,72 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
     FocusLight->SetIntensity(1500.0f + (1400.0f * FocusPulse) + (500.0f * PressureAlpha));
     FocusLight->SetLightColor(FMath::Lerp(FLinearColor(0.55f, 0.8f, 1.0f), FLinearColor(1.0f, 0.55f, 0.55f), PressureAlpha).ToFColor(true));
 
-    RoomAudio->SetVolumeMultiplier(0.22f + (0.1f * PressureAlpha));
-    RoomAudio->SetPitchMultiplier(0.62f + (0.06f * PressureAlpha));
-    IntercomBedAudio->SetVolumeMultiplier(0.12f + (0.05f * PressureAlpha));
+    float RoomVolumeBias = 0.0f;
+    float RoomPitchBias = 0.0f;
+    float HVACVolumeBias = 0.0f;
+    float HVACPitchBias = 0.0f;
+    float ClockVolumeBias = 0.0f;
+    float ClockPitchBias = 0.0f;
+    float FluorescentVolumeBias = 0.0f;
+
+    if (CurrentRoomName == TEXT("Server Room"))
+    {
+        HVACVolumeBias = 0.13f;
+        HVACPitchBias = -0.05f;
+        RoomPitchBias = -0.05f;
+        ClockVolumeBias = -0.04f;
+        FluorescentVolumeBias = -0.02f;
+    }
+    else if (CurrentRoomName == TEXT("Lobby"))
+    {
+        ClockVolumeBias = 0.09f;
+        ClockPitchBias = 0.05f;
+        RoomVolumeBias = -0.05f;
+        FluorescentVolumeBias = -0.03f;
+    }
+    else if (CurrentRoomName == TEXT("The Archive"))
+    {
+        RoomVolumeBias = 0.07f;
+        RoomPitchBias = -0.08f;
+        HVACVolumeBias = -0.04f;
+        HVACPitchBias = -0.04f;
+        ClockVolumeBias = -0.02f;
+        FluorescentVolumeBias = -0.04f;
+    }
+    else if (CurrentRoomName == TEXT("CEO Office"))
+    {
+        ClockVolumeBias = 0.05f;
+        ClockPitchBias = 0.03f;
+        RoomVolumeBias = -0.04f;
+        HVACVolumeBias = -0.05f;
+        FluorescentVolumeBias = -0.02f;
+    }
+    else if (CurrentRoomName == TEXT("Breakroom"))
+    {
+        FluorescentVolumeBias = 0.03f;
+        HVACVolumeBias = 0.01f;
+    }
+    else if (CurrentRoomName == TEXT("Hallway"))
+    {
+        ClockVolumeBias = 0.02f;
+        RoomPitchBias = -0.02f;
+    }
+    else if (CurrentRoomName == TEXT("Cubicle Farm"))
+    {
+        FluorescentVolumeBias = 0.02f;
+        RoomVolumeBias = 0.02f;
+    }
+
+    const float TargetIntercomDuck = bIntercomActive ? (0.58f - (0.05f * PressureAlpha)) : 1.0f;
+    SmoothedIntercomDuck = FMath::FInterpTo(SmoothedIntercomDuck, TargetIntercomDuck, DeltaSeconds, bIntercomActive ? 8.5f : 3.5f);
+
+    RoomAudio->SetVolumeMultiplier((0.22f + (0.1f * PressureAlpha) + RoomVolumeBias) * SmoothedIntercomDuck);
+    RoomAudio->SetPitchMultiplier(0.62f + (0.06f * PressureAlpha) + RoomPitchBias);
+    HVACAudio->SetVolumeMultiplier((0.12f + (0.08f * PressureAlpha) + HVACVolumeBias) * FMath::Lerp(1.0f, SmoothedIntercomDuck, 0.85f));
+    HVACAudio->SetPitchMultiplier(0.76f - (0.04f * PressureAlpha) + HVACPitchBias);
+    ClockAudio->SetVolumeMultiplier((0.04f + (0.08f * UrgencyAlpha) + (0.03f * PressureAlpha) + ClockVolumeBias) * FMath::Lerp(1.0f, SmoothedIntercomDuck, 0.6f));
+    ClockAudio->SetPitchMultiplier(0.9f + (0.18f * UrgencyAlpha) + (0.04f * PressureAlpha) + ClockPitchBias);
+    FluorescentAudio->SetVolumeMultiplier((0.06f + (0.06f * Flicker) + (0.04f * PressureAlpha) + FluorescentVolumeBias) * FMath::Lerp(1.0f, SmoothedIntercomDuck, 0.75f));
+    FluorescentAudio->SetPitchMultiplier(0.95f + (0.05f * Flicker) - (0.03f * PressureAlpha));
+    IntercomBedAudio->SetVolumeMultiplier((0.12f + (0.05f * PressureAlpha)) * FMath::Lerp(0.82f, 1.08f, bIntercomActive ? 1.0f : 0.0f));
 }

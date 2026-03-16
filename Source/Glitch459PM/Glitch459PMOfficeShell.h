@@ -94,6 +94,15 @@ private:
     class UAudioComponent* RoomAudio;
 
     UPROPERTY(VisibleAnywhere)
+    class UAudioComponent* HVACAudio;
+
+    UPROPERTY(VisibleAnywhere)
+    class UAudioComponent* ClockAudio;
+
+    UPROPERTY(VisibleAnywhere)
+    class UAudioComponent* FluorescentAudio;
+
+    UPROPERTY(VisibleAnywhere)
     class UAudioComponent* IntercomBedAudio;
 
     UPROPERTY(VisibleAnywhere)
@@ -135,6 +144,15 @@ private:
     UPROPERTY(EditAnywhere, Category = "Audio|VO")
     FString IntercomVoiceAssetRoot = TEXT("/Game/Audio/VO/Intercom");
 
+    UPROPERTY(EditAnywhere, Category = "Audio|Ambience")
+    FString HVACLoopAssetPath = TEXT("/Game/Audio/Ambience/A_HVACHum.A_HVACHum");
+
+    UPROPERTY(EditAnywhere, Category = "Audio|Ambience")
+    FString ClockLoopAssetPath = TEXT("/Game/Audio/Ambience/A_ClockTick.A_ClockTick");
+
+    UPROPERTY(EditAnywhere, Category = "Audio|Ambience")
+    FString FluorescentLoopAssetPath = TEXT("/Game/Audio/Ambience/A_FluorescentBuzz.A_FluorescentBuzz");
+
     UPROPERTY(Transient)
     TMap<FName, TObjectPtr<class USoundBase>> ResolvedIntercomVoiceCache;
 
@@ -142,12 +160,16 @@ private:
     int32 LastStyledLoop = INDEX_NONE;
     int32 LastAudioPressureLevel = INDEX_NONE;
     int32 LastIntercomEventCount = 0;
+    int32 LastReportEventCount = 0;
+    int32 LastMissedAnomalyEventCount = 0;
     bool bWasIntercomActive = false;
+    float SmoothedIntercomDuck = 1.0f;
 
     void ConfigureSurface(class UStaticMeshComponent* MeshComponent, const FVector& RelativeLocation, const FVector& RelativeScale, const FRotator& RelativeRotation = FRotator::ZeroRotator) const;
     void ApplyLoopMaterialVariation(int32 LoopNumber, int32 PressureLevel);
     void PlayReactiveStinger(class USoundBase* Sound, const FVector& WorldLocation, float VolumeMultiplier, float PitchMultiplier) const;
     class USoundBase* FindIntercomVoiceAsset(FName VoiceKey) const;
     FString BuildIntercomVoiceAssetPath(FName VoiceKey) const;
+    class USoundBase* LoadLoopOrFallback(const FString& AssetPath, class USoundBase* FallbackSound) const;
     void RefreshAtmosphere(float DeltaSeconds);
 };

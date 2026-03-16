@@ -10,6 +10,15 @@ This project is set up to support royalty-free assets from FAB, Quixel Megascans
 4. Corporate office material set (carpet tiles, ceiling panels, cubicle fabric)
 5. Vintage office props (water cooler, printer, desk phone, CRT monitor)
 
+## Suggested Audio Asset Names
+
+- `Content/Audio/Ambience/A_HVACHum`
+- `Content/Audio/Ambience/A_ClockTick`
+- `Content/Audio/Ambience/A_FluorescentBuzz`
+- `Content/Audio/Ambience/A_OfficeDreadBed`
+- `Content/Audio/Stingers/A_IntercomCrackle`
+- `Content/Audio/Stingers/A_PressureRise`
+
 ## Recommended Sources
 
 - FAB (free and licensed packs): office props, ambience loops, horror stingers

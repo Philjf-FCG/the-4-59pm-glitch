@@ -13,6 +13,18 @@ enum class ELoopDirectiveType : uint8
     InspectObject
 };
 
+UENUM()
+enum class EGlitchAnomalyClass : uint8
+{
+    Unknown,
+    Temporal,
+    Organic,
+    Surveillance,
+    Spatial,
+    Intercom,
+    Identity
+};
+
 USTRUCT()
 struct FGlitchExit
 {
@@ -80,6 +92,9 @@ struct FGlitchAnomaly
 
     UPROPERTY()
     FString Clue;
+
+    UPROPERTY()
+    EGlitchAnomalyClass AnomalyClass = EGlitchAnomalyClass::Unknown;
 };
 
 USTRUCT()
@@ -162,6 +177,15 @@ public:
     FString GetCurrentIntercomLine() const { return CurrentIntercomLine; }
     FName GetCurrentIntercomVoiceKey() const { return CurrentIntercomVoiceKey; }
     int32 GetIntercomEventCount() const { return IntercomEventCount; }
+    int32 GetReportEventCount() const { return ReportEventCount; }
+    bool WasLastReportCorrect() const { return bLastReportCorrect; }
+    FName GetLastReportedAnomalyId() const { return LastReportedAnomalyId; }
+    FName GetLastReportedRoomId() const { return LastReportedRoomId; }
+    EGlitchAnomalyClass GetLastReportedAnomalyClass() const { return LastReportedAnomalyClass; }
+    int32 GetMissedAnomalyEventCount() const { return MissedAnomalyEventCount; }
+    FName GetLastMissedAnomalyId() const { return LastMissedAnomalyId; }
+    FName GetLastMissedRoomId() const { return LastMissedRoomId; }
+    EGlitchAnomalyClass GetLastMissedAnomalyClass() const { return LastMissedAnomalyClass; }
     FString GetCurrentPremonition() const { return CurrentPremonition; }
     FString GetCurrentDirective() const { return CurrentDirectiveText; }
     FString GetLastLoopReview() const { return LastLoopReview; }
@@ -217,6 +241,7 @@ private:
 
     bool TryUnlockShortcut(const FName& ShortcutId, const FString& DiscoveryMessage);
     bool TryCollectFragment(const FName& FragmentId, const FString& DiscoveryMessage);
+    EGlitchAnomalyClass ResolveAnomalyClass(const FGlitchAnomaly* Anomaly) const;
 
     FString BuildObjectDisplayName(const FName& ObjectId) const;
     FString BuildRoomDistortionText(const FName& RoomId) const;
@@ -343,6 +368,33 @@ private:
 
     UPROPERTY()
     int32 IntercomEventCount = 0;
+
+    UPROPERTY()
+    int32 ReportEventCount = 0;
+
+    UPROPERTY()
+    bool bLastReportCorrect = false;
+
+    UPROPERTY()
+    FName LastReportedAnomalyId;
+
+    UPROPERTY()
+    FName LastReportedRoomId;
+
+    UPROPERTY()
+    EGlitchAnomalyClass LastReportedAnomalyClass = EGlitchAnomalyClass::Unknown;
+
+    UPROPERTY()
+    int32 MissedAnomalyEventCount = 0;
+
+    UPROPERTY()
+    FName LastMissedAnomalyId;
+
+    UPROPERTY()
+    FName LastMissedRoomId;
+
+    UPROPERTY()
+    EGlitchAnomalyClass LastMissedAnomalyClass = EGlitchAnomalyClass::Unknown;
 
     UPROPERTY()
     FString CurrentPremonition;

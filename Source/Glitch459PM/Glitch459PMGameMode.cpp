@@ -238,20 +238,20 @@ void AGlitch459PMGameMode::SeedNarrativeData()
     ObjectDescriptions.Add(TEXT("quit_box"), TEXT("A suggestion box overflowing with unsigned resignation letters."));
 
     AnomalyDeck = {
-        { TEXT("tentacle_cooler"), TEXT("breakroom"), TEXT("water_cooler"), TEXT("Rubbery tendrils churn inside the jug."), TEXT("The cooler's shadow has too many joints.") },
-        { TEXT("ink_coffee"), TEXT("breakroom"), TEXT("microwave"), TEXT("The coffee in your mug ripples black like printer ink."), TEXT("It smells like toner, not coffee.") },
-        { TEXT("happy_hour_mirage"), TEXT("breakroom"), TEXT("breakroom_door"), TEXT("Music swells behind the door; beyond it is only abyss."), TEXT("The party has no people, only echo.") },
-        { TEXT("photo_swap"), TEXT("cubicles"), TEXT("desk_photo"), TEXT("The photo in the frame now shows you sleeping at your desk."), TEXT("You don't remember posing for this.") },
-        { TEXT("screaming_coworkers"), TEXT("cubicles"), TEXT("coworkers"), TEXT("Their banal joke stretches into a continuous scream."), TEXT("Laughter has become a siren.") },
-        { TEXT("eternal_todo"), TEXT("cubicles"), TEXT("printer"), TEXT("The printer outputs your life history in reverse order."), TEXT("The paper starts with your retirement and ends at birth.") },
-        { TEXT("year_2085"), TEXT("cubicles"), TEXT("arthur_terminal"), TEXT("Unread emails dated 2085 ask for the same report."), TEXT("The sender is still your boss.") },
-        { TEXT("breathing_clock"), TEXT("hallway"), TEXT("wall_clock"), TEXT("The clock face fogs in and out with your breath."), TEXT("The ticking now inhales.") },
-        { TEXT("bleeding_poster"), TEXT("hallway"), TEXT("poster"), TEXT("TEAMWORK drips downward like wet paint and old blood."), TEXT("A slogan is leaking.") },
-        { TEXT("expanding_office"), TEXT("hallway"), TEXT("exit_sign"), TEXT("The hallway stretches longer than before. Doors multiply when unobserved."), TEXT("You feel lost in a familiar place.") },
-        { TEXT("doubled_door"), TEXT("lobby"), TEXT("exit_doors"), TEXT("The glass reflects the breakroom from an impossible angle."), TEXT("Outside has been replaced with inside.") },
-        { TEXT("camera_eyelid"), TEXT("lobby"), TEXT("security_camera"), TEXT("The camera blinks. Not a light. An eyelid."), TEXT("Something is watching back.") },
-        { TEXT("boss_shoes"), TEXT("ceo_office"), TEXT("intercom"), TEXT("Polished shoes stand beneath the bathroom stall in your reflection."), TEXT("The boss is always just out of frame.") },
-        { TEXT("archive_whisper"), TEXT("archive"), TEXT("clone_rows"), TEXT("The clones whisper your employee number in unison."), TEXT("They all clocked out. None left.") }
+        { TEXT("tentacle_cooler"), TEXT("breakroom"), TEXT("water_cooler"), TEXT("Rubbery tendrils churn inside the jug."), TEXT("The cooler's shadow has too many joints."), EGlitchAnomalyClass::Organic },
+        { TEXT("ink_coffee"), TEXT("breakroom"), TEXT("microwave"), TEXT("The coffee in your mug ripples black like printer ink."), TEXT("It smells like toner, not coffee."), EGlitchAnomalyClass::Organic },
+        { TEXT("happy_hour_mirage"), TEXT("breakroom"), TEXT("breakroom_door"), TEXT("Music swells behind the door; beyond it is only abyss."), TEXT("The party has no people, only echo."), EGlitchAnomalyClass::Spatial },
+        { TEXT("photo_swap"), TEXT("cubicles"), TEXT("desk_photo"), TEXT("The photo in the frame now shows you sleeping at your desk."), TEXT("You don't remember posing for this."), EGlitchAnomalyClass::Identity },
+        { TEXT("screaming_coworkers"), TEXT("cubicles"), TEXT("coworkers"), TEXT("Their banal joke stretches into a continuous scream."), TEXT("Laughter has become a siren."), EGlitchAnomalyClass::Identity },
+        { TEXT("eternal_todo"), TEXT("cubicles"), TEXT("printer"), TEXT("The printer outputs your life history in reverse order."), TEXT("The paper starts with your retirement and ends at birth."), EGlitchAnomalyClass::Identity },
+        { TEXT("year_2085"), TEXT("cubicles"), TEXT("arthur_terminal"), TEXT("Unread emails dated 2085 ask for the same report."), TEXT("The sender is still your boss."), EGlitchAnomalyClass::Temporal },
+        { TEXT("breathing_clock"), TEXT("hallway"), TEXT("wall_clock"), TEXT("The clock face fogs in and out with your breath."), TEXT("The ticking now inhales."), EGlitchAnomalyClass::Temporal },
+        { TEXT("bleeding_poster"), TEXT("hallway"), TEXT("poster"), TEXT("TEAMWORK drips downward like wet paint and old blood."), TEXT("A slogan is leaking."), EGlitchAnomalyClass::Surveillance },
+        { TEXT("expanding_office"), TEXT("hallway"), TEXT("exit_sign"), TEXT("The hallway stretches longer than before. Doors multiply when unobserved."), TEXT("You feel lost in a familiar place."), EGlitchAnomalyClass::Spatial },
+        { TEXT("doubled_door"), TEXT("lobby"), TEXT("exit_doors"), TEXT("The glass reflects the breakroom from an impossible angle."), TEXT("Outside has been replaced with inside."), EGlitchAnomalyClass::Spatial },
+        { TEXT("camera_eyelid"), TEXT("lobby"), TEXT("security_camera"), TEXT("The camera blinks. Not a light. An eyelid."), TEXT("Something is watching back."), EGlitchAnomalyClass::Surveillance },
+        { TEXT("boss_shoes"), TEXT("ceo_office"), TEXT("intercom"), TEXT("Polished shoes stand beneath the bathroom stall in your reflection."), TEXT("The boss is always just out of frame."), EGlitchAnomalyClass::Intercom },
+        { TEXT("archive_whisper"), TEXT("archive"), TEXT("clone_rows"), TEXT("The clones whisper your employee number in unison."), TEXT("They all clocked out. None left."), EGlitchAnomalyClass::Intercom }
     };
 }
 
@@ -684,6 +684,52 @@ bool AGlitch459PMGameMode::TryCollectFragment(const FName& FragmentId, const FSt
     return true;
 }
 
+EGlitchAnomalyClass AGlitch459PMGameMode::ResolveAnomalyClass(const FGlitchAnomaly* Anomaly) const
+{
+    if (!Anomaly)
+    {
+        return EGlitchAnomalyClass::Unknown;
+    }
+
+    if (Anomaly->AnomalyClass != EGlitchAnomalyClass::Unknown)
+    {
+        return Anomaly->AnomalyClass;
+    }
+
+    const FString IdKey = Anomaly->Id.ToString().ToLower();
+    if (IdKey.Contains(TEXT("clock")) || IdKey.Contains(TEXT("time")) || IdKey.Contains(TEXT("year")))
+    {
+        return EGlitchAnomalyClass::Temporal;
+    }
+
+    if (IdKey.Contains(TEXT("tentacle")) || IdKey.Contains(TEXT("ink")) || IdKey.Contains(TEXT("bleeding")) || IdKey.Contains(TEXT("breathing")))
+    {
+        return EGlitchAnomalyClass::Organic;
+    }
+
+    if (IdKey.Contains(TEXT("camera")) || IdKey.Contains(TEXT("poster")) || IdKey.Contains(TEXT("watch")))
+    {
+        return EGlitchAnomalyClass::Surveillance;
+    }
+
+    if (IdKey.Contains(TEXT("expanding")) || IdKey.Contains(TEXT("doubled")) || IdKey.Contains(TEXT("mirage")))
+    {
+        return EGlitchAnomalyClass::Spatial;
+    }
+
+    if (IdKey.Contains(TEXT("intercom")) || IdKey.Contains(TEXT("boss")) || IdKey.Contains(TEXT("whisper")))
+    {
+        return EGlitchAnomalyClass::Intercom;
+    }
+
+    if (IdKey.Contains(TEXT("photo")) || IdKey.Contains(TEXT("screaming")) || IdKey.Contains(TEXT("archive")))
+    {
+        return EGlitchAnomalyClass::Identity;
+    }
+
+    return EGlitchAnomalyClass::Unknown;
+}
+
 void AGlitch459PMGameMode::HandleIntercomWhisper()
 {
     const int32 EffectiveDuration = GetEffectiveLoopDuration();
@@ -875,6 +921,24 @@ void AGlitch459PMGameMode::ResetLoop()
         PressureLevel
     );
     AddLog(LastLoopReview);
+
+    if (!bAnomalyFlaggedThisLoop)
+    {
+        if (const FGlitchAnomaly* MissedAnomaly = GetCurrentAnomaly())
+        {
+            ++MissedAnomalyEventCount;
+            LastMissedAnomalyId = MissedAnomaly->Id;
+            LastMissedRoomId = MissedAnomaly->RoomId;
+            LastMissedAnomalyClass = ResolveAnomalyClass(MissedAnomaly);
+        }
+        else
+        {
+            ++MissedAnomalyEventCount;
+            LastMissedAnomalyId = NAME_None;
+            LastMissedRoomId = CurrentRoomId;
+            LastMissedAnomalyClass = EGlitchAnomalyClass::Unknown;
+        }
+    }
 
     if (PressureLevel >= 5)
     {
@@ -1083,6 +1147,15 @@ void AGlitch459PMGameMode::AutomationInitializeForTests()
     CurrentIntercomLine.Empty();
     CurrentIntercomVoiceKey = NAME_None;
     IntercomEventCount = 0;
+    ReportEventCount = 0;
+    bLastReportCorrect = false;
+    LastReportedAnomalyId = NAME_None;
+    LastReportedRoomId = NAME_None;
+    LastReportedAnomalyClass = EGlitchAnomalyClass::Unknown;
+    MissedAnomalyEventCount = 0;
+    LastMissedAnomalyId = NAME_None;
+    LastMissedRoomId = NAME_None;
+    LastMissedAnomalyClass = EGlitchAnomalyClass::Unknown;
     CurrentPremonition.Empty();
     CurrentDirectiveType = ELoopDirectiveType::None;
     DirectiveTargetRoom = NAME_None;
@@ -1355,11 +1428,19 @@ bool AGlitch459PMGameMode::TryFlagSelectedObject()
 
     if (IsSelectedObjectAnomaly())
     {
+        const FGlitchAnomaly* ActiveAnomaly = GetCurrentAnomaly();
         bAnomalyFlaggedThisLoop = true;
         if (CurrentDirectiveType == ELoopDirectiveType::StabilizeAnomaly)
         {
             bDirectiveCompletedThisLoop = true;
         }
+
+        ++ReportEventCount;
+        bLastReportCorrect = true;
+        LastReportedAnomalyId = ActiveAnomaly ? ActiveAnomaly->Id : NAME_None;
+        LastReportedRoomId = ActiveAnomaly ? ActiveAnomaly->RoomId : CurrentRoomId;
+        LastReportedAnomalyClass = ResolveAnomalyClass(ActiveAnomaly);
+
         ResolvedAnomalies = FMath::Min(ResolvedAnomalies + 1, RequiredAnomalies);
         AddLog(TEXT("Anomaly flagged. Reality steadies for exactly one breath. The lights flicker, and the air grows colder."));
 
@@ -1389,6 +1470,22 @@ bool AGlitch459PMGameMode::TryFlagSelectedObject()
     }
 
     PressureLevel = FMath::Min(PressureLevel + 1, 5);
+
+    ++ReportEventCount;
+    bLastReportCorrect = false;
+    if (const FGlitchAnomaly* ActiveAnomaly = GetCurrentAnomaly())
+    {
+        LastReportedAnomalyId = ActiveAnomaly->Id;
+        LastReportedRoomId = ActiveAnomaly->RoomId;
+        LastReportedAnomalyClass = ResolveAnomalyClass(ActiveAnomaly);
+    }
+    else
+    {
+        LastReportedAnomalyId = NAME_None;
+        LastReportedRoomId = CurrentRoomId;
+        LastReportedAnomalyClass = EGlitchAnomalyClass::Unknown;
+    }
+
     AddLog(TEXT("False report. HR auto-reply: Thank you for your vigilance."));
     AddLog(TEXT("Pressure rises after filing the wrong incident. The lights dim, and your heartbeat echoes in your ears."));
     // Subtle horror effect: add a random unsettling message for false report
