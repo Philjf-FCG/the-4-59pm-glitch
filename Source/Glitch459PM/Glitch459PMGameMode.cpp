@@ -241,11 +241,13 @@ void AGlitch459PMGameMode::SeedNarrativeData()
         { TEXT("tentacle_cooler"), TEXT("breakroom"), TEXT("water_cooler"), TEXT("Rubbery tendrils churn inside the jug."), TEXT("The cooler's shadow has too many joints.") },
         { TEXT("ink_coffee"), TEXT("breakroom"), TEXT("microwave"), TEXT("The coffee in your mug ripples black like printer ink."), TEXT("It smells like toner, not coffee.") },
         { TEXT("happy_hour_mirage"), TEXT("breakroom"), TEXT("breakroom_door"), TEXT("Music swells behind the door; beyond it is only abyss."), TEXT("The party has no people, only echo.") },
+        { TEXT("photo_swap"), TEXT("cubicles"), TEXT("desk_photo"), TEXT("The photo in the frame now shows you sleeping at your desk."), TEXT("You don't remember posing for this.") },
         { TEXT("screaming_coworkers"), TEXT("cubicles"), TEXT("coworkers"), TEXT("Their banal joke stretches into a continuous scream."), TEXT("Laughter has become a siren.") },
         { TEXT("eternal_todo"), TEXT("cubicles"), TEXT("printer"), TEXT("The printer outputs your life history in reverse order."), TEXT("The paper starts with your retirement and ends at birth.") },
         { TEXT("year_2085"), TEXT("cubicles"), TEXT("arthur_terminal"), TEXT("Unread emails dated 2085 ask for the same report."), TEXT("The sender is still your boss.") },
         { TEXT("breathing_clock"), TEXT("hallway"), TEXT("wall_clock"), TEXT("The clock face fogs in and out with your breath."), TEXT("The ticking now inhales.") },
         { TEXT("bleeding_poster"), TEXT("hallway"), TEXT("poster"), TEXT("TEAMWORK drips downward like wet paint and old blood."), TEXT("A slogan is leaking.") },
+        { TEXT("expanding_office"), TEXT("hallway"), TEXT("exit_sign"), TEXT("The hallway stretches longer than before. Doors multiply when unobserved."), TEXT("You feel lost in a familiar place.") },
         { TEXT("doubled_door"), TEXT("lobby"), TEXT("exit_doors"), TEXT("The glass reflects the breakroom from an impossible angle."), TEXT("Outside has been replaced with inside.") },
         { TEXT("camera_eyelid"), TEXT("lobby"), TEXT("security_camera"), TEXT("The camera blinks. Not a light. An eyelid."), TEXT("Something is watching back.") },
         { TEXT("boss_shoes"), TEXT("ceo_office"), TEXT("intercom"), TEXT("Polished shoes stand beneath the bathroom stall in your reflection."), TEXT("The boss is always just out of frame.") },
@@ -340,13 +342,33 @@ void AGlitch459PMGameMode::ApplyNarrativeBeatForLoop()
     {
         AddLog(TEXT("Coffee tastes faintly like ink. You tell yourself it's the machine."));
     }
+    else if (CurrentLoop == 3)
+    {
+        AddLog(TEXT("The breakroom music sounds distant, but the party never starts."));
+    }
     else if (CurrentLoop == 4)
     {
         AddLog(TEXT("A coworker's desk photo now shows you asleep at your station."));
     }
+    else if (CurrentLoop == 5)
+    {
+        AddLog(TEXT("The printer starts feeding paper with your life history in reverse."));
+    }
+    else if (CurrentLoop == 6)
+    {
+        AddLog(TEXT("TEAMWORK poster drips downward like wet paint and old blood."));
+    }
     else if (CurrentLoop == 7)
     {
         AddLog(TEXT("The office seems larger than before. Hallways multiply when unobserved."));
+    }
+    else if (CurrentLoop == 8)
+    {
+        AddLog(TEXT("The hallway stretches longer than before. Doors multiply when unobserved."));
+    }
+    else if (CurrentLoop == 9)
+    {
+        AddLog(TEXT("The camera blinks. Not a light. An eyelid."));
     }
     else if (CurrentLoop == 10)
     {
