@@ -42,3 +42,4 @@ This project is set up to support royalty-free assets from FAB, Quixel Megascans
 
 - Add entries here as assets are imported.
 - Format: Asset Name | Source URL | License | Notes
+- SBS Horror Texture Pack 512x512 | User-provided archive in project root | See included License.txt | Imported selected wall, ceiling, floor, metal, and accent textures into /Game/Horror for fallback room and terminal materials.

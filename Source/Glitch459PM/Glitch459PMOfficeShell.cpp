@@ -19,8 +19,11 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     SetRootComponent(SceneRoot);
 
     static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
-    static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterial(TEXT("/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial"));
-    static ConstructorHelpers::FObjectFinder<UMaterialInterface> FloorMaterial(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterial(TEXT("/Game/Horror/Materials/M_HorrorWall.M_HorrorWall"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> CeilingMaterial(TEXT("/Game/Horror/Materials/M_HorrorCeiling.M_HorrorCeiling"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> FloorMaterial(TEXT("/Game/Horror/Materials/M_HorrorFloor.M_HorrorFloor"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> MetalMaterial(TEXT("/Game/Horror/Materials/M_HorrorMetal.M_HorrorMetal"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> AccentMaterial(TEXT("/Game/Horror/Materials/M_HorrorAccent.M_HorrorAccent"));
     static ConstructorHelpers::FObjectFinder<USoundBase> AmbientSound(TEXT("/Engine/EditorSounds/Notifications/CompileStart_Cue.CompileStart_Cue"));
 
     Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Floor"));
@@ -43,6 +46,9 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
 
     Desk = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Desk"));
     Desk->SetupAttachment(SceneRoot);
+
+    Door = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Door"));
+    Door->SetupAttachment(SceneRoot);
 
     RoomLabel = CreateDefaultSubobject<UTextRenderComponent>(TEXT("RoomLabel"));
     RoomLabel->SetupAttachment(SceneRoot);
@@ -98,6 +104,7 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
         EastWall->SetStaticMesh(CubeMesh.Object);
         WestWall->SetStaticMesh(CubeMesh.Object);
         Desk->SetStaticMesh(CubeMesh.Object);
+        Door->SetStaticMesh(CubeMesh.Object);
     }
 
     if (WallMaterial.Succeeded())
@@ -106,13 +113,26 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
         SouthWall->SetMaterial(0, WallMaterial.Object);
         EastWall->SetMaterial(0, WallMaterial.Object);
         WestWall->SetMaterial(0, WallMaterial.Object);
-        Ceiling->SetMaterial(0, WallMaterial.Object);
+    }
+
+    if (CeilingMaterial.Succeeded())
+    {
+        Ceiling->SetMaterial(0, CeilingMaterial.Object);
     }
 
     if (FloorMaterial.Succeeded())
     {
         Floor->SetMaterial(0, FloorMaterial.Object);
-        Desk->SetMaterial(0, FloorMaterial.Object);
+    }
+
+    if (MetalMaterial.Succeeded())
+    {
+        Desk->SetMaterial(0, MetalMaterial.Object);
+    }
+
+    if (AccentMaterial.Succeeded())
+    {
+        Door->SetMaterial(0, AccentMaterial.Object);
     }
 
     if (AmbientSound.Succeeded())
@@ -127,6 +147,7 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     ConfigureSurface(EastWall, FVector(600.0f, 0.0f, 200.0f), FVector(0.2f, 12.0f, 4.2f));
     ConfigureSurface(WestWall, FVector(-600.0f, 0.0f, 200.0f), FVector(0.2f, 12.0f, 4.2f));
     ConfigureSurface(Desk, FVector(280.0f, 0.0f, 42.0f), FVector(1.8f, 0.9f, 0.5f));
+    ConfigureSurface(Door, FVector(0.0f, -588.0f, 150.0f), FVector(1.2f, 0.16f, 3.0f));
 
     RoomLabel->SetRelativeLocation(FVector(280.0f, -180.0f, 110.0f));
     RoomLabel->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));

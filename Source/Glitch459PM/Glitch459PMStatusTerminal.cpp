@@ -19,8 +19,8 @@ AGlitch459PMStatusTerminal::AGlitch459PMStatusTerminal()
     SetRootComponent(SceneRoot);
 
     static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
-    static ConstructorHelpers::FObjectFinder<UMaterialInterface> BodyMaterial(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
-    static ConstructorHelpers::FObjectFinder<UMaterialInterface> ScreenMaterial(TEXT("/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> BodyMaterial(TEXT("/Game/Horror/Materials/M_HorrorMetal.M_HorrorMetal"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> ScreenMaterial(TEXT("/Game/Horror/Materials/M_HorrorAccent.M_HorrorAccent"));
     static ConstructorHelpers::FObjectFinder<USoundBase> TerminalSound(TEXT("/Engine/EditorSounds/Notifications/CompileSuccess_Cue.CompileSuccess_Cue"));
 
     TerminalPedestal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TerminalPedestal"));

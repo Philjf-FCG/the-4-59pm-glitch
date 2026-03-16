@@ -40,6 +40,9 @@ private:
     class UStaticMeshComponent* Desk;
 
     UPROPERTY(VisibleAnywhere)
+    class UStaticMeshComponent* Door;
+
+    UPROPERTY(VisibleAnywhere)
     class UTextRenderComponent* RoomLabel;
 
     UPROPERTY(VisibleAnywhere)

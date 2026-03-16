@@ -26,7 +26,7 @@ If you press Play in an otherwise empty map, the prototype now spawns a fallback
 
 If PIE still opens into an empty template world, check that the project is using `Glitch459PMGameMode` in Project Settings > Maps & Modes. The runtime office shell only appears when the custom game mode is active.
 
-The fallback environment now includes textured walls/floor, a multi-part terminal prop, terminal glow flicker, spatial ambient audio, pressure-reactive room lighting/signage, and in-world object/exit/directive/task/premonition/status displays so test runs feel closer to the intended office atmosphere.
+The fallback environment now includes imported horror texture-pack materials on walls/ceiling/floor/door/terminal surfaces, a multi-part terminal prop, terminal glow flicker, spatial ambient audio, pressure-reactive room lighting/signage, and in-world object/exit/directive/task/premonition/status displays so test runs feel closer to the intended office atmosphere.
 
 ### Gameplay Loop
 
