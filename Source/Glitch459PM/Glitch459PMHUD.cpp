@@ -106,7 +106,10 @@ void AGlitch459PMHUD::DrawHUD()
     DrawText(FString::Printf(TEXT("Loop Review: %s"), *GameMode->GetLastLoopReview()), FLinearColor(0.84f, 0.78f, 0.96f), X, Y, Font, 0.9f);
     Y += 28.0f;
 
-    DrawText(TEXT("Controls: Q/E object  R/T exit  Z/C task  Tab inspect  F flag anomaly  X complete task  Enter use exit"), FLinearColor(0.62f, 0.73f, 0.68f), X, Y, Font, 0.95f);
+    DrawText(TEXT("KBM: Q/E object  R/T exit  Z/C task  Tab inspect  F flag anomaly  X complete task  Enter use exit  Shift sprint"), FLinearColor(0.62f, 0.73f, 0.68f), X, Y, Font, 0.95f);
+    Y += 24.0f;
+
+    DrawText(TEXT("Gamepad: LB/RB object  D-pad L/R exit  D-pad U/D task  Y inspect  RT flag anomaly  X complete task  A use exit  L3 sprint"), FLinearColor(0.62f, 0.73f, 0.68f), X, Y, Font, 0.95f);
     Y += 36.0f;
 
     DrawText(TEXT("Internal Monologue:"), FLinearColor(0.9f, 0.97f, 0.93f), X, Y, Font, 1.0f);

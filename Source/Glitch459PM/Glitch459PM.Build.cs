@@ -6,6 +6,10 @@ public class Glitch459PM : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        PrivateDependencyModuleNames.AddRange(new string[]
+        {
+        });
+
         PublicDependencyModuleNames.AddRange(new string[]
         {
             "Core",
@@ -13,5 +17,13 @@ public class Glitch459PM : ModuleRules
             "Engine",
             "InputCore"
         });
+
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[]
+            {
+                "UnrealEd"
+            });
+        }
     }
 }

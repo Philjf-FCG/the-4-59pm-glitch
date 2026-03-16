@@ -11,6 +11,7 @@
 #include "Materials/MaterialInterface.h"
 #include "Sound/SoundBase.h"
 #include "UObject/ConstructorHelpers.h"
+#include "UObject/UObjectGlobals.h"
 
 AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
 {
@@ -106,6 +107,34 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     RoomAudio->AttenuationOverrides.LPFRadiusMin = 320.0f;
     RoomAudio->AttenuationOverrides.LPFRadiusMax = 2200.0f;
 
+    IntercomBedAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("IntercomBedAudio"));
+    IntercomBedAudio->SetupAttachment(SceneRoot);
+    IntercomBedAudio->bAutoActivate = false;
+    IntercomBedAudio->SetRelativeLocation(FVector(500.0f, -260.0f, 220.0f));
+    IntercomBedAudio->SetVolumeMultiplier(0.18f);
+    IntercomBedAudio->SetPitchMultiplier(0.92f);
+    IntercomBedAudio->bAllowSpatialization = true;
+    IntercomBedAudio->bOverrideAttenuation = true;
+    IntercomBedAudio->AttenuationOverrides.bAttenuate = true;
+    IntercomBedAudio->AttenuationOverrides.bSpatialize = true;
+    IntercomBedAudio->AttenuationOverrides.AttenuationShapeExtents = FVector(100.0f, 0.0f, 0.0f);
+    IntercomBedAudio->AttenuationOverrides.FalloffDistance = 1600.0f;
+    IntercomBedAudio->AttenuationOverrides.dBAttenuationAtMax = -28.0f;
+
+    IntercomVoiceAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("IntercomVoiceAudio"));
+    IntercomVoiceAudio->SetupAttachment(SceneRoot);
+    IntercomVoiceAudio->bAutoActivate = false;
+    IntercomVoiceAudio->SetRelativeLocation(FVector(500.0f, -260.0f, 220.0f));
+    IntercomVoiceAudio->SetVolumeMultiplier(0.92f);
+    IntercomVoiceAudio->SetPitchMultiplier(1.0f);
+    IntercomVoiceAudio->bAllowSpatialization = true;
+    IntercomVoiceAudio->bOverrideAttenuation = true;
+    IntercomVoiceAudio->AttenuationOverrides.bAttenuate = true;
+    IntercomVoiceAudio->AttenuationOverrides.bSpatialize = true;
+    IntercomVoiceAudio->AttenuationOverrides.AttenuationShapeExtents = FVector(120.0f, 0.0f, 0.0f);
+    IntercomVoiceAudio->AttenuationOverrides.FalloffDistance = 2400.0f;
+    IntercomVoiceAudio->AttenuationOverrides.dBAttenuationAtMax = -20.0f;
+
     if (CubeMesh.Succeeded())
     {
         Floor->SetStaticMesh(CubeMesh.Object);
@@ -173,6 +202,7 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     if (IntercomStinger.Succeeded())
     {
         IntercomStingerSound = IntercomStinger.Object;
+        IntercomBuzzLoop = IntercomStinger.Object;
     }
 
     if (PressureStinger.Succeeded())
@@ -365,6 +395,51 @@ void AGlitch459PMOfficeShell::PlayReactiveStinger(USoundBase* Sound, const FVect
     UGameplayStatics::PlaySoundAtLocation(World, Sound, WorldLocation, VolumeMultiplier, PitchMultiplier);
 }
 
+USoundBase* AGlitch459PMOfficeShell::FindIntercomVoiceAsset(FName VoiceKey) const
+{
+    if (VoiceKey.IsNone())
+    {
+        return nullptr;
+    }
+
+    if (const TObjectPtr<USoundBase>* CachedSound = ResolvedIntercomVoiceCache.Find(VoiceKey))
+    {
+        return CachedSound->Get();
+    }
+
+    for (const FGlitchIntercomVoiceAsset& Entry : IntercomVoiceAssets)
+    {
+        if (Entry.VoiceKey == VoiceKey && Entry.Sound)
+        {
+            const_cast<AGlitch459PMOfficeShell*>(this)->ResolvedIntercomVoiceCache.Add(VoiceKey, Entry.Sound);
+            return Entry.Sound.Get();
+        }
+    }
+
+    const FString AssetPath = BuildIntercomVoiceAssetPath(VoiceKey);
+    if (!AssetPath.IsEmpty())
+    {
+        if (USoundBase* AutoLoadedSound = LoadObject<USoundBase>(nullptr, *AssetPath))
+        {
+            const_cast<AGlitch459PMOfficeShell*>(this)->ResolvedIntercomVoiceCache.Add(VoiceKey, AutoLoadedSound);
+            return AutoLoadedSound;
+        }
+    }
+
+    return nullptr;
+}
+
+FString AGlitch459PMOfficeShell::BuildIntercomVoiceAssetPath(FName VoiceKey) const
+{
+    if (VoiceKey.IsNone() || IntercomVoiceAssetRoot.IsEmpty())
+    {
+        return FString();
+    }
+
+    const FString AssetName = VoiceKey.ToString();
+    return FString::Printf(TEXT("%s/%s.%s"), *IntercomVoiceAssetRoot, *AssetName, *AssetName);
+}
+
 void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
 {
     UWorld* World = GetWorld();
@@ -381,10 +456,31 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
 
     const int32 CurrentPressure = GameMode->GetPressureLevel();
     const bool bIntercomActive = GameMode->IsIntercomActiveThisLoop();
+    const int32 CurrentIntercomEventCount = GameMode->GetIntercomEventCount();
 
     if (bIntercomActive && !bWasIntercomActive)
     {
         PlayReactiveStinger(IntercomStingerSound.Get(), IntercomLight->GetComponentLocation(), 0.42f, 0.92f + (0.04f * CurrentPressure));
+    }
+
+    if (CurrentIntercomEventCount > LastIntercomEventCount)
+    {
+        if (IntercomBuzzLoop)
+        {
+            IntercomBedAudio->SetSound(IntercomBuzzLoop);
+            IntercomBedAudio->Play();
+        }
+
+        if (USoundBase* VoiceAsset = FindIntercomVoiceAsset(GameMode->GetCurrentIntercomVoiceKey()))
+        {
+            IntercomVoiceAudio->SetSound(VoiceAsset);
+            IntercomVoiceAudio->Play();
+        }
+    }
+
+    if (!bIntercomActive)
+    {
+        IntercomBedAudio->Stop();
     }
 
     if (LastAudioPressureLevel != INDEX_NONE && CurrentPressure > LastAudioPressureLevel)
@@ -395,6 +491,7 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
 
     bWasIntercomActive = bIntercomActive;
     LastAudioPressureLevel = CurrentPressure;
+    LastIntercomEventCount = CurrentIntercomEventCount;
 
     AtmospherePhase += DeltaSeconds * (1.2f + (0.35f * GameMode->GetPressureLevel()));
     const float Flicker = 0.5f + (0.5f * FMath::Sin(AtmospherePhase));
@@ -439,8 +536,9 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
         : FMath::Lerp(FLinearColor(0.35f, 0.45f, 0.55f), FLinearColor(0.72f, 0.32f, 0.32f), PressureAlpha)).ToFColor(true));
 
     const FString StatusText = FString::Printf(
-        TEXT("STATUS\nINTERCOM %s\nTASK %s\n%s"),
+        TEXT("STATUS\nINTERCOM %s\nVOICE %s\nTASK %s\n%s"),
         bIntercomActive ? TEXT("ACTIVE") : TEXT("QUIET"),
+        GameMode->GetCurrentIntercomVoiceKey().IsNone() ? TEXT("UNASSIGNED") : *GameMode->GetCurrentIntercomVoiceKey().ToString().ToUpper(),
         bTaskDone ? TEXT("DONE") : TEXT("PENDING"),
         *GameMode->GetLastLoopReview().ToUpper()
     );
@@ -453,4 +551,5 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
 
     RoomAudio->SetVolumeMultiplier(0.22f + (0.1f * PressureAlpha));
     RoomAudio->SetPitchMultiplier(0.62f + (0.06f * PressureAlpha));
+    IntercomBedAudio->SetVolumeMultiplier(0.12f + (0.05f * PressureAlpha));
 }

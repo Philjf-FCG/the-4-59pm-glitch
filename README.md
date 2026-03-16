@@ -91,6 +91,57 @@ The fallback environment now includes imported horror texture-pack materials on 
 - `F`: Flag selected object as anomaly
 - `X`: Complete selected task (if at the right room/object)
 - `Enter`: Use selected exit
+- `Gamepad Left Stick`: Move
+- `Gamepad Right Stick`: Look
+- `Gamepad L3`: Sprint
+- `Gamepad LB / RB`: Previous or next object
+- `Gamepad D-Pad Left / Right`: Previous or next exit
+- `Gamepad D-Pad Up / Down`: Previous or next task
+- `Gamepad Y`: Inspect selected object
+- `Gamepad RT`: Flag selected object as anomaly
+- `Gamepad X`: Complete selected task
+- `Gamepad A`: Use selected exit
+
+### Automation Tests
+
+The repository now includes Unreal editor automation smoke tests for core gameplay interactions:
+
+- Pawn movement input and sprint speed changes
+- Object selection wraparound
+- Correct anomaly reporting
+- False anomaly reporting pressure penalties
+
+Run the full gameplay suite from PowerShell:
+
+```powershell
+.\Scripts\Run-GameplaySmokeTests.ps1
+```
+
+If Unreal is installed in a non-default location, pass either `-EngineRoot` or `-EditorCmd`:
+
+```powershell
+.\Scripts\Run-GameplaySmokeTests.ps1 -EngineRoot "D:\Epic\UE_5.6"
+```
+
+To run an arbitrary automation filter directly:
+
+```powershell
+.\Scripts\Run-UnrealAutomation.ps1 -TestFilter "Project.Glitch459PM"
+```
+
+### Voice Import Workflow
+
+Intercom VO can now be imported with zero C++ changes if you name assets to match the manifest keys and place them under `Content/Audio/VO/Intercom`.
+
+- Example asset names: `neutral_01`, `obedient_02`, `defiant_04`
+- Runtime lookup path: `/Game/Audio/VO/Intercom/<key>.<key>`
+- Optional override: assign explicit clips in the `IntercomVoiceAssets` array on a Blueprint derived from the office shell
+
+To validate imported voice assets against the manifest:
+
+```powershell
+.\Scripts\Validate-IntercomVoiceAssets.ps1
+```
 
 ### Code Structure
 

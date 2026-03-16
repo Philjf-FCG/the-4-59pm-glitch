@@ -109,6 +109,18 @@ struct FGlitchTask
     FString CompletionText;
 };
 
+USTRUCT()
+struct FGlitchIntercomLine
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    FName VoiceKey;
+
+    UPROPERTY()
+    FString Text;
+};
+
 UCLASS()
 class GLITCH459PM_API AGlitch459PMGameMode : public AGameModeBase
 {
@@ -147,6 +159,9 @@ public:
     int32 GetCollectedFragmentCount() const { return CollectedFragments.Num(); }
     int32 GetRequiredFragmentCount() const { return RequiredFragments; }
     bool IsIntercomActiveThisLoop() const { return bIntercomActiveThisLoop; }
+    FString GetCurrentIntercomLine() const { return CurrentIntercomLine; }
+    FName GetCurrentIntercomVoiceKey() const { return CurrentIntercomVoiceKey; }
+    int32 GetIntercomEventCount() const { return IntercomEventCount; }
     FString GetCurrentPremonition() const { return CurrentPremonition; }
     FString GetCurrentDirective() const { return CurrentDirectiveText; }
     FString GetLastLoopReview() const { return LastLoopReview; }
@@ -165,6 +180,15 @@ public:
     bool TryFlagSelectedObject();
     bool TryUseSelectedExit();
     bool TryCompleteSelectedTask();
+
+#if WITH_DEV_AUTOMATION_TESTS
+    void AutomationInitializeForTests();
+    bool AutomationSetCurrentRoom(FName RoomId);
+    bool AutomationSetSelectedObjectById(FName ObjectId);
+    bool AutomationSetCurrentAnomalyById(FName AnomalyId);
+    FName AutomationGetCurrentRoomId() const { return CurrentRoomId; }
+    FName AutomationGetSelectedObjectId() const;
+#endif
 
 private:
     void EnsurePlayableSpace();
@@ -310,6 +334,15 @@ private:
 
     UPROPERTY()
     int32 LastIntercomLineIndex = INDEX_NONE;
+
+    UPROPERTY()
+    FString CurrentIntercomLine;
+
+    UPROPERTY()
+    FName CurrentIntercomVoiceKey;
+
+    UPROPERTY()
+    int32 IntercomEventCount = 0;
 
     UPROPERTY()
     FString CurrentPremonition;

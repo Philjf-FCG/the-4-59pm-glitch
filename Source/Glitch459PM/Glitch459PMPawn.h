@@ -14,6 +14,16 @@ public:
 
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+#if WITH_DEV_AUTOMATION_TESTS
+    void AutomationAttachController(class AController* InController);
+    void AutomationMoveForward(float Value);
+    void AutomationMoveRight(float Value);
+    void AutomationStartSprint();
+    void AutomationStopSprint();
+    FVector AutomationGetPendingMovementInput() const;
+    float AutomationGetMaxWalkSpeed() const;
+#endif
+
 private:
     void MoveForward(float Value);
     void MoveRight(float Value);

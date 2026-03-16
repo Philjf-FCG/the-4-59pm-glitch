@@ -1,0 +1,33 @@
+{
+  "voice_direction": {
+    "character": "The Boss / Intercom",
+    "style": "calm corporate menace",
+    "performance_notes": [
+      "Measured HR cadence",
+      "Subtle contempt rather than shouting",
+      "Natural voice with minimal effects baked in",
+      "Leave room for Unreal reverb, filtering, and stingers"
+    ],
+    "technical_notes": {
+      "sample_rate_hz": 48000,
+      "format": "wav",
+      "normalization_target_dbfs": -3
+    }
+  },
+  "lines": [
+    { "key": "obedient_01", "text": "Arthur, exemplary obedience noted. Promotion review is no longer theoretical." },
+    { "key": "obedient_02", "text": "Arthur, compliance trend positive. Continue proving that you can be useful forever." },
+    { "key": "obedient_03", "text": "Arthur, management appreciates how quickly you stopped asking why." },
+    { "key": "obedient_04", "text": "Arthur, the building trusts employees who do not improvise." },
+    { "key": "defiant_01", "text": "Arthur, noncompliance recorded. The weekend is moving further away from you." },
+    { "key": "defiant_02", "text": "Arthur, we can hear you thinking about escape. Please return to task." },
+    { "key": "defiant_03", "text": "Arthur, failure to follow directives will be reflected in your eternity review." },
+    { "key": "defiant_04", "text": "Arthur, insubordination is just panic with paperwork attached." },
+    { "key": "neutral_01", "text": "Arthur, your promotion packet is almost ready. Keep working." },
+    { "key": "neutral_02", "text": "Arthur, the weekend is a privilege tier you have not unlocked." },
+    { "key": "neutral_03", "text": "Arthur, we reviewed your resignation. It was denied retroactively." },
+    { "key": "neutral_04", "text": "Arthur, productivity is how we measure the soul." },
+    { "key": "neutral_05", "text": "Arthur, the Archive says you are improving." },
+    { "key": "neutral_06", "text": "Arthur, your best years are still in this building." }
+  ]
+}

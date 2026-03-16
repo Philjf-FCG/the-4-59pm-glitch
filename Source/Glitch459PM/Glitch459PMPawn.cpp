@@ -69,3 +69,41 @@ void AGlitch459PMPawn::StopSprint()
         MoveComp->MaxWalkSpeed = WalkSpeed;
     }
 }
+
+#if WITH_DEV_AUTOMATION_TESTS
+void AGlitch459PMPawn::AutomationAttachController(AController* InController)
+{
+    Controller = InController;
+}
+
+void AGlitch459PMPawn::AutomationMoveForward(float Value)
+{
+    MoveForward(Value);
+}
+
+void AGlitch459PMPawn::AutomationMoveRight(float Value)
+{
+    MoveRight(Value);
+}
+
+void AGlitch459PMPawn::AutomationStartSprint()
+{
+    StartSprint();
+}
+
+void AGlitch459PMPawn::AutomationStopSprint()
+{
+    StopSprint();
+}
+
+FVector AGlitch459PMPawn::AutomationGetPendingMovementInput() const
+{
+    return GetPendingMovementInputVector();
+}
+
+float AGlitch459PMPawn::AutomationGetMaxWalkSpeed() const
+{
+    const UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+    return MoveComp ? MoveComp->MaxWalkSpeed : 0.0f;
+}
+#endif

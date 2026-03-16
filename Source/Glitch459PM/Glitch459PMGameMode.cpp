@@ -693,34 +693,34 @@ void AGlitch459PMGameMode::HandleIntercomWhisper()
         return;
     }
 
-    TArray<FString> IntercomLines;
+    TArray<FGlitchIntercomLine> IntercomLines;
     if (ComplianceScore >= 4)
     {
         IntercomLines = {
-            TEXT("Arthur, exemplary obedience noted. Promotion review is no longer theoretical."),
-            TEXT("Arthur, compliance trend positive. Continue proving that you can be useful forever."),
-            TEXT("Arthur, management appreciates how quickly you stopped asking why."),
-            TEXT("Arthur, the building trusts employees who do not improvise.")
+            { TEXT("obedient_01"), TEXT("Arthur, exemplary obedience noted. Promotion review is no longer theoretical.") },
+            { TEXT("obedient_02"), TEXT("Arthur, compliance trend positive. Continue proving that you can be useful forever.") },
+            { TEXT("obedient_03"), TEXT("Arthur, management appreciates how quickly you stopped asking why.") },
+            { TEXT("obedient_04"), TEXT("Arthur, the building trusts employees who do not improvise.") }
         };
     }
     else if (ComplianceScore <= -2)
     {
         IntercomLines = {
-            TEXT("Arthur, noncompliance recorded. The weekend is moving further away from you."),
-            TEXT("Arthur, we can hear you thinking about escape. Please return to task."),
-            TEXT("Arthur, failure to follow directives will be reflected in your eternity review."),
-            TEXT("Arthur, insubordination is just panic with paperwork attached.")
+            { TEXT("defiant_01"), TEXT("Arthur, noncompliance recorded. The weekend is moving further away from you.") },
+            { TEXT("defiant_02"), TEXT("Arthur, we can hear you thinking about escape. Please return to task.") },
+            { TEXT("defiant_03"), TEXT("Arthur, failure to follow directives will be reflected in your eternity review.") },
+            { TEXT("defiant_04"), TEXT("Arthur, insubordination is just panic with paperwork attached.") }
         };
     }
     else
     {
         IntercomLines = {
-            TEXT("Arthur, your promotion packet is almost ready. Keep working."),
-            TEXT("Arthur, the weekend is a privilege tier you have not unlocked."),
-            TEXT("Arthur, we reviewed your resignation. It was denied retroactively."),
-            TEXT("Arthur, productivity is how we measure the soul."),
-            TEXT("Arthur, the Archive says you are improving."),
-            TEXT("Arthur, your best years are still in this building.")
+            { TEXT("neutral_01"), TEXT("Arthur, your promotion packet is almost ready. Keep working.") },
+            { TEXT("neutral_02"), TEXT("Arthur, the weekend is a privilege tier you have not unlocked.") },
+            { TEXT("neutral_03"), TEXT("Arthur, we reviewed your resignation. It was denied retroactively.") },
+            { TEXT("neutral_04"), TEXT("Arthur, productivity is how we measure the soul.") },
+            { TEXT("neutral_05"), TEXT("Arthur, the Archive says you are improving.") },
+            { TEXT("neutral_06"), TEXT("Arthur, your best years are still in this building.") }
         };
     }
 
@@ -740,7 +740,10 @@ void AGlitch459PMGameMode::HandleIntercomWhisper()
 
     LastIntercomLineIndex = NewLineIndex;
     bIntercomActiveThisLoop = true;
-    AddLog(FString::Printf(TEXT("INTERCOM: %s"), *IntercomLines[NewLineIndex]));
+    CurrentIntercomLine = IntercomLines[NewLineIndex].Text;
+    CurrentIntercomVoiceKey = IntercomLines[NewLineIndex].VoiceKey;
+    ++IntercomEventCount;
+    AddLog(FString::Printf(TEXT("INTERCOM: %s"), *CurrentIntercomLine));
 
     const int32 NextGap = 10 + FMath::RandRange(0, 8);
     NextIntercomSecond = FMath::Min(CurrentSecond + NextGap, EffectiveDuration - 2);
@@ -823,6 +826,24 @@ void AGlitch459PMGameMode::TickLoopSecond()
 
     ++CurrentSecond;
     HandleIntercomWhisper();
+
+    int32 SecondsLeft = GetSecondsRemaining();
+    if (SecondsLeft <= 10 && SecondsLeft > 0)
+    {
+        TArray<FString> UrgencyMessages = {
+            TEXT("The lights flicker. You feel the office watching you."),
+            TEXT("Your heartbeat grows louder. The clock is almost at 5:00."),
+            TEXT("Reality feels thin. You must hurry."),
+            TEXT("A cold sweat forms as the second hand nears midnight."),
+            TEXT("You hear distant footsteps, but no one is there.")
+        };
+        AddLog(UrgencyMessages[FMath::RandRange(0, UrgencyMessages.Num() - 1)]);
+    }
+
+    if (SecondsLeft == 1)
+    {
+        AddLog(TEXT("The second hand is about to reset. Sprint if you can!"));
+    }
 
     if (CurrentSecond >= GetEffectiveLoopDuration())
     {
@@ -988,11 +1009,12 @@ FString AGlitch459PMGameMode::GetTerminalStatusText() const
     }
 
     const FString IntercomState = bIntercomActiveThisLoop ? TEXT("ACTIVE") : TEXT("QUIET");
+    const FString IntercomLine = CurrentIntercomLine.IsEmpty() ? TEXT("NO BROADCAST") : CurrentIntercomLine;
     const FString OutcomeHint = CollectedFragments.Num() >= RequiredFragments
         ? TEXT("MEMORY RESTORED")
         : TEXT("MEMORY INCOMPLETE");
     const FString ReviewLine = LastLoopReview.IsEmpty() ? TEXT("NO PRIOR LOOP REVIEW") : LastLoopReview;
-    const FString TerminalFooter = CurrentDirectiveText + TEXT("\n") + OutcomeHint + TEXT("\n") + ReviewLine;
+    const FString TerminalFooter = FString::Printf(TEXT("%s\nLAST CALL: %s\n%s\n%s"), *CurrentDirectiveText, *IntercomLine, *OutcomeHint, *ReviewLine);
 
     return FString::Printf(
         TEXT("FINAL FRIDAY REPORT TERMINAL\nTIME %s\nLOOP %d\nPRESSURE %d/5\nANOMALIES %d/%d\nFRAGMENTS %d/%d\nINTERCOM %s\n%s\n%s"),
@@ -1019,6 +1041,121 @@ FString AGlitch459PMGameMode::GetSelectedObjectName() const
 
     return BuildObjectDisplayName(Room->Objects[SelectedObjectIndex]);
 }
+
+#if WITH_DEV_AUTOMATION_TESTS
+void AGlitch459PMGameMode::AutomationInitializeForTests()
+{
+    Rooms.Empty();
+    ObjectDescriptions.Empty();
+    AnomalyDeck.Empty();
+    MundaneTaskPool.Empty();
+    SurrealTaskPool.Empty();
+    CurrentLoopTasks.Empty();
+    DiscoveredShortcuts.Empty();
+    CollectedFragments.Empty();
+    SeenAnomaliesThisCycle.Empty();
+    LogLines.Empty();
+
+    CurrentRoomId = TEXT("breakroom");
+    SelectedObjectIndex = 0;
+    SelectedExitIndex = 0;
+    CurrentAnomalyIndex = INDEX_NONE;
+    SelectedTaskIndex = 0;
+    CurrentLoop = 1;
+    CurrentSecond = 0;
+    ResolvedAnomalies = 0;
+    CompletedTaskCount = 0;
+    PressureLevel = 0;
+    ComplianceScore = 0;
+    bAnomalyFlaggedThisLoop = false;
+    bGameWon = false;
+    bGameLost = false;
+    bEndingHintLogged = false;
+    OverloadStrikes = 0;
+    LastInspectionText = TEXT("Friday, 4:57 PM. Three minutes to freedom. Your badge still works. For now.");
+    EndingHeadline.Empty();
+    EndingBody.Empty();
+    LastMundaneTaskId = NAME_None;
+    LastSurrealTaskId = NAME_None;
+    bIntercomActiveThisLoop = false;
+    NextIntercomSecond = 20;
+    LastIntercomLineIndex = INDEX_NONE;
+    CurrentIntercomLine.Empty();
+    CurrentIntercomVoiceKey = NAME_None;
+    IntercomEventCount = 0;
+    CurrentPremonition.Empty();
+    CurrentDirectiveType = ELoopDirectiveType::None;
+    DirectiveTargetRoom = NAME_None;
+    DirectiveTargetObject = NAME_None;
+    CurrentDirectiveText.Empty();
+    bDirectiveCompletedThisLoop = false;
+    LastLoopReview.Empty();
+
+    SeedNarrativeData();
+    SeedTaskPools();
+    PickNextAnomaly();
+    GeneratePremonition();
+    BuildLoopTasks();
+    GenerateDirective();
+}
+
+FName AGlitch459PMGameMode::AutomationGetSelectedObjectId() const
+{
+    const FGlitchRoom* Room = GetCurrentRoom();
+    if (!Room || !Room->Objects.IsValidIndex(SelectedObjectIndex))
+    {
+        return NAME_None;
+    }
+
+    return Room->Objects[SelectedObjectIndex];
+}
+
+bool AGlitch459PMGameMode::AutomationSetCurrentRoom(FName RoomId)
+{
+    const FGlitchRoom* Room = Rooms.Find(RoomId);
+    if (!Room)
+    {
+        return false;
+    }
+
+    CurrentRoomId = RoomId;
+    SelectedObjectIndex = 0;
+    SelectedExitIndex = 0;
+    return true;
+}
+
+bool AGlitch459PMGameMode::AutomationSetSelectedObjectById(FName ObjectId)
+{
+    const FGlitchRoom* Room = GetCurrentRoom();
+    if (!Room)
+    {
+        return false;
+    }
+
+    const int32 ObjectIndex = Room->Objects.IndexOfByKey(ObjectId);
+    if (ObjectIndex == INDEX_NONE)
+    {
+        return false;
+    }
+
+    SelectedObjectIndex = ObjectIndex;
+    return true;
+}
+
+bool AGlitch459PMGameMode::AutomationSetCurrentAnomalyById(FName AnomalyId)
+{
+    for (int32 Index = 0; Index < AnomalyDeck.Num(); ++Index)
+    {
+        if (AnomalyDeck[Index].Id == AnomalyId)
+        {
+            CurrentAnomalyIndex = Index;
+            return true;
+        }
+    }
+
+    return false;
+}
+#endif
 
 FString AGlitch459PMGameMode::GetSelectedExitLabel() const
 {
