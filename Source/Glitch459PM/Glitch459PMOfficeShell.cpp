@@ -119,6 +119,7 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
 
     if (WallMaterial.Succeeded())
     {
+        WallMaterialAsset = WallMaterial.Object;
         NorthWall->SetMaterial(0, WallMaterial.Object);
         SouthWall->SetMaterial(0, WallMaterial.Object);
         EastWall->SetMaterial(0, WallMaterial.Object);
@@ -127,31 +128,37 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
 
     if (CeilingMaterial.Succeeded())
     {
+        CeilingMaterialAsset = CeilingMaterial.Object;
         Ceiling->SetMaterial(0, CeilingMaterial.Object);
     }
 
     if (FloorMaterial.Succeeded())
     {
+        FloorMaterialAsset = FloorMaterial.Object;
         Floor->SetMaterial(0, FloorMaterial.Object);
     }
 
     if (MetalMaterial.Succeeded())
     {
+        MetalMaterialAsset = MetalMaterial.Object;
         Desk->SetMaterial(0, MetalMaterial.Object);
     }
 
     if (AccentMaterial.Succeeded())
     {
+        AccentMaterialAsset = AccentMaterial.Object;
         Door->SetMaterial(0, AccentMaterial.Object);
     }
 
     if (StainMaterial.Succeeded())
     {
+        StainMaterialAsset = StainMaterial.Object;
         StainPanel->SetMaterial(0, StainMaterial.Object);
     }
 
     if (StoneMaterial.Succeeded())
     {
+        StoneMaterialAsset = StoneMaterial.Object;
         StonePlinth->SetMaterial(0, StoneMaterial.Object);
     }
 
@@ -259,6 +266,81 @@ void AGlitch459PMOfficeShell::ConfigureSurface(UStaticMeshComponent* MeshCompone
     MeshComponent->SetMobility(EComponentMobility::Movable);
 }
 
+void AGlitch459PMOfficeShell::ApplyLoopMaterialVariation(int32 LoopNumber, int32 PressureLevel)
+{
+    if (LoopNumber <= 0)
+    {
+        return;
+    }
+
+    FRandomStream Random(LoopNumber * 113 + (PressureLevel * 29));
+
+    TArray<UStaticMeshComponent*> WallSurfaces = { NorthWall, SouthWall, EastWall, WestWall };
+    for (UStaticMeshComponent* WallSurface : WallSurfaces)
+    {
+        if (!WallSurface)
+        {
+            continue;
+        }
+
+        UMaterialInterface* ChosenMaterial = WallMaterialAsset.Get();
+        const int32 Roll = Random.RandRange(0, 99);
+        if (Roll >= 78 && StoneMaterialAsset)
+        {
+            ChosenMaterial = StoneMaterialAsset.Get();
+        }
+        else if (Roll >= 52 && StainMaterialAsset)
+        {
+            ChosenMaterial = StainMaterialAsset.Get();
+        }
+
+        if (ChosenMaterial)
+        {
+            WallSurface->SetMaterial(0, ChosenMaterial);
+        }
+    }
+
+    if (StainPanel)
+    {
+        const bool bHeavyStaining = Random.RandRange(0, 99) < (40 + (PressureLevel * 8));
+        StainPanel->SetVisibility(bHeavyStaining, true);
+        const float Tilt = Random.FRandRange(-7.0f, 7.0f);
+        const float HeightJitter = Random.FRandRange(-12.0f, 18.0f);
+        ConfigureSurface(StainPanel, FVector(594.0f, 240.0f, 130.0f + HeightJitter), FVector(0.03f, 3.0f, 1.9f), FRotator(0.0f, 0.0f, Tilt));
+    }
+
+    if (StonePlinth)
+    {
+        const bool bStoneDominant = (Random.RandRange(0, 99) < 55) || PressureLevel >= 3;
+        StonePlinth->SetMaterial(0, (bStoneDominant && StoneMaterialAsset) ? StoneMaterialAsset.Get() : FloorMaterialAsset.Get());
+        const float ShiftX = Random.FRandRange(-40.0f, 55.0f);
+        const float ShiftY = Random.FRandRange(-30.0f, 45.0f);
+        ConfigureSurface(StonePlinth, FVector(-260.0f + ShiftX, 320.0f + ShiftY, 24.0f), FVector(1.15f, 0.9f, 0.26f));
+    }
+
+    if (Desk)
+    {
+        const bool bDeskCorrupted = Random.RandRange(0, 99) < (22 + (PressureLevel * 9));
+        UMaterialInterface* DeskMaterial = bDeskCorrupted && StainMaterialAsset ? StainMaterialAsset.Get() : MetalMaterialAsset.Get();
+        if (DeskMaterial)
+        {
+            Desk->SetMaterial(0, DeskMaterial);
+        }
+    }
+
+    if (Door)
+    {
+        const bool bStoneDoor = Random.RandRange(0, 99) < (10 + (PressureLevel * 6));
+        UMaterialInterface* DoorMaterial = bStoneDoor && StoneMaterialAsset ? StoneMaterialAsset.Get() : AccentMaterialAsset.Get();
+        if (DoorMaterial)
+        {
+            Door->SetMaterial(0, DoorMaterial);
+        }
+    }
+
+    LastStyledLoop = LoopNumber;
+}
+
 void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
 {
     UWorld* World = GetWorld();
@@ -266,6 +348,11 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
     if (!GameMode)
     {
         return;
+    }
+
+    if (LastStyledLoop != GameMode->GetCurrentLoop())
+    {
+        ApplyLoopMaterialVariation(GameMode->GetCurrentLoop(), GameMode->GetPressureLevel());
     }
 
     AtmospherePhase += DeltaSeconds * (1.2f + (0.35f * GameMode->GetPressureLevel()));
