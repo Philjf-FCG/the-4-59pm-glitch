@@ -12,6 +12,8 @@ TEXTURE_MAP = {
     'Ceiling': 'Horror_Wall_11-512x512.png',
     'Metal': 'Horror_Metal_03-512x512.png',
     'Accent': 'Horror_Misc_05-512x512.png',
+    'Stain': 'Horror_Stain_09-512x512.png',
+    'Stone': 'Horror_Stone_03-512x512.png',
 }
 
 asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
@@ -73,7 +75,15 @@ ensure_dir(MATERIAL_ROOT)
 
 imported_assets = {}
 for category, filename in TEXTURE_MAP.items():
-    folder = 'Misc' if category == 'Accent' else category if category != 'Ceiling' else 'Wall'
+    if category == 'Accent':
+        folder = 'Misc'
+    elif category == 'Ceiling':
+        folder = 'Wall'
+    elif category == 'Stain':
+        folder = 'Stains'
+    else:
+        folder = category
+
     src_path = os.path.join(SOURCE_ROOT, folder, filename)
     imported_path = import_texture(src_path, DEST_ROOT)
     if imported_path:
@@ -90,6 +100,10 @@ if 'Metal' in imported_assets:
     created_materials['Metal'] = create_surface_material('M_HorrorMetal', imported_assets['Metal'], 0.48, 0.15)
 if 'Accent' in imported_assets:
     created_materials['Accent'] = create_surface_material('M_HorrorAccent', imported_assets['Accent'], 0.65)
+if 'Stain' in imported_assets:
+    created_materials['Stain'] = create_surface_material('M_HorrorStain', imported_assets['Stain'], 0.88)
+if 'Stone' in imported_assets:
+    created_materials['Stone'] = create_surface_material('M_HorrorStone', imported_assets['Stone'], 0.9)
 
 unreal.log('Imported textures: {}'.format(imported_assets))
 unreal.log('Created materials: {}'.format(created_materials))

@@ -43,6 +43,12 @@ private:
     class UStaticMeshComponent* Door;
 
     UPROPERTY(VisibleAnywhere)
+    class UStaticMeshComponent* StainPanel;
+
+    UPROPERTY(VisibleAnywhere)
+    class UStaticMeshComponent* StonePlinth;
+
+    UPROPERTY(VisibleAnywhere)
     class UTextRenderComponent* RoomLabel;
 
     UPROPERTY(VisibleAnywhere)
