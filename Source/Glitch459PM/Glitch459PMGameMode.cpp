@@ -1224,26 +1224,45 @@ bool AGlitch459PMGameMode::TryFlagSelectedObject()
             bDirectiveCompletedThisLoop = true;
         }
         ResolvedAnomalies = FMath::Min(ResolvedAnomalies + 1, RequiredAnomalies);
-        AddLog(TEXT("Anomaly flagged. Reality steadies for exactly one breath."));
+        AddLog(TEXT("Anomaly flagged. Reality steadies for exactly one breath. The lights flicker, and the air grows colder."));
 
         if (PressureLevel > 0)
         {
             PressureLevel = FMath::Max(PressureLevel - 1, 0);
-            AddLog(TEXT("A correct report lowers your panic for this loop."));
+            AddLog(TEXT("A correct report lowers your panic for this loop. You feel a brief sense of relief, but the office remains watchful."));
         }
 
         if (ResolvedAnomalies >= RequiredAnomalies && !bEndingHintLogged)
         {
             bEndingHintLogged = true;
-            AddLog(TEXT("All required anomalies stabilized. One of these exits may finally tell the truth."));
+            AddLog(TEXT("All required anomalies stabilized. One of these exits may finally tell the truth. Shadows move differently now."));
         }
+
+        // Subtle horror effect: add a random unsettling message
+        TArray<FString> HorrorEffects = {
+            TEXT("You hear a distant whisper: 'Arthur, are you paying attention?'"),
+            TEXT("The printer jams for a moment, then resumes with a new page: 'You are being watched.'"),
+            TEXT("A cold breeze passes, but no windows are open."),
+            TEXT("The clock ticks backwards for a single second."),
+            TEXT("Your badge vibrates, then falls silent.")
+        };
+        AddLog(HorrorEffects[FMath::RandRange(0, HorrorEffects.Num() - 1)]);
 
         return true;
     }
 
     PressureLevel = FMath::Min(PressureLevel + 1, 5);
     AddLog(TEXT("False report. HR auto-reply: Thank you for your vigilance."));
-    AddLog(TEXT("Pressure rises after filing the wrong incident."));
+    AddLog(TEXT("Pressure rises after filing the wrong incident. The lights dim, and your heartbeat echoes in your ears."));
+    // Subtle horror effect: add a random unsettling message for false report
+    TArray<FString> FalseHorrorEffects = {
+        TEXT("You feel a presence behind you, but when you turn, nothing is there."),
+        TEXT("The intercom crackles: 'Incorrect. Try again.'"),
+        TEXT("Your screen flashes: 'ERROR: Reality not found.'"),
+        TEXT("A shadow moves across the wall, but no one else is in the room."),
+        TEXT("The coffee tastes bitter, almost metallic.")
+    };
+    AddLog(FalseHorrorEffects[FMath::RandRange(0, FalseHorrorEffects.Num() - 1)]);
     return false;
 }
 
