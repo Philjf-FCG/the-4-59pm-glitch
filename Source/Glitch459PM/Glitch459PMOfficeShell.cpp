@@ -7,6 +7,7 @@
 #include "Components/TextRenderComponent.h"
 #include "Glitch459PMGameMode.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "Sound/SoundBase.h"
 #include "UObject/ConstructorHelpers.h"
@@ -27,6 +28,8 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> StainMaterial(TEXT("/Game/Horror/Materials/M_HorrorStain.M_HorrorStain"));
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> StoneMaterial(TEXT("/Game/Horror/Materials/M_HorrorStone.M_HorrorStone"));
     static ConstructorHelpers::FObjectFinder<USoundBase> AmbientSound(TEXT("/Engine/EditorSounds/Notifications/CompileStart_Cue.CompileStart_Cue"));
+    static ConstructorHelpers::FObjectFinder<USoundBase> IntercomStinger(TEXT("/Engine/EditorSounds/Notifications/CompileSuccess_Cue.CompileSuccess_Cue"));
+    static ConstructorHelpers::FObjectFinder<USoundBase> PressureStinger(TEXT("/Engine/EditorSounds/Notifications/CompileFailed_Cue.CompileFailed_Cue"));
 
     Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Floor"));
     Floor->SetupAttachment(SceneRoot);
@@ -165,6 +168,16 @@ AGlitch459PMOfficeShell::AGlitch459PMOfficeShell()
     if (AmbientSound.Succeeded())
     {
         RoomAudio->SetSound(AmbientSound.Object);
+    }
+
+    if (IntercomStinger.Succeeded())
+    {
+        IntercomStingerSound = IntercomStinger.Object;
+    }
+
+    if (PressureStinger.Succeeded())
+    {
+        PressureStingerSound = PressureStinger.Object;
     }
 
     ConfigureSurface(Floor, FVector(0.0f, 0.0f, -10.0f), FVector(12.0f, 12.0f, 0.2f));
@@ -341,6 +354,17 @@ void AGlitch459PMOfficeShell::ApplyLoopMaterialVariation(int32 LoopNumber, int32
     LastStyledLoop = LoopNumber;
 }
 
+void AGlitch459PMOfficeShell::PlayReactiveStinger(USoundBase* Sound, const FVector& WorldLocation, float VolumeMultiplier, float PitchMultiplier) const
+{
+    UWorld* World = GetWorld();
+    if (!World || !Sound)
+    {
+        return;
+    }
+
+    UGameplayStatics::PlaySoundAtLocation(World, Sound, WorldLocation, VolumeMultiplier, PitchMultiplier);
+}
+
 void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
 {
     UWorld* World = GetWorld();
@@ -354,6 +378,23 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
     {
         ApplyLoopMaterialVariation(GameMode->GetCurrentLoop(), GameMode->GetPressureLevel());
     }
+
+    const int32 CurrentPressure = GameMode->GetPressureLevel();
+    const bool bIntercomActive = GameMode->IsIntercomActiveThisLoop();
+
+    if (bIntercomActive && !bWasIntercomActive)
+    {
+        PlayReactiveStinger(IntercomStingerSound.Get(), IntercomLight->GetComponentLocation(), 0.42f, 0.92f + (0.04f * CurrentPressure));
+    }
+
+    if (LastAudioPressureLevel != INDEX_NONE && CurrentPressure > LastAudioPressureLevel)
+    {
+        const float PressureStep = static_cast<float>(CurrentPressure - LastAudioPressureLevel);
+        PlayReactiveStinger(PressureStingerSound.Get(), OverheadLight->GetComponentLocation(), 0.35f + (0.08f * PressureStep), 0.74f - (0.03f * static_cast<float>(CurrentPressure)));
+    }
+
+    bWasIntercomActive = bIntercomActive;
+    LastAudioPressureLevel = CurrentPressure;
 
     AtmospherePhase += DeltaSeconds * (1.2f + (0.35f * GameMode->GetPressureLevel()));
     const float Flicker = 0.5f + (0.5f * FMath::Sin(AtmospherePhase));
@@ -391,7 +432,6 @@ void AGlitch459PMOfficeShell::RefreshAtmosphere(float DeltaSeconds)
     const FLinearColor PendingTaskColor = FMath::Lerp(FLinearColor(1.0f, 0.86f, 0.72f), FLinearColor(1.0f, 0.72f, 0.72f), TaskPulse * 0.45f);
     TaskLabel->SetTextRenderColor((bTaskDone ? FLinearColor(0.7f, 1.0f, 0.76f) : PendingTaskColor).ToFColor(true));
 
-    const bool bIntercomActive = GameMode->IsIntercomActiveThisLoop();
     const float IntercomPulse = 0.5f + (0.5f * FMath::Sin(AtmospherePhase * 4.2f));
     IntercomLight->SetIntensity(bIntercomActive ? (900.0f + (2000.0f * IntercomPulse)) : (120.0f + (260.0f * PressureAlpha)));
     IntercomLight->SetLightColor((bIntercomActive

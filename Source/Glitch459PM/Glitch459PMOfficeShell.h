@@ -102,10 +102,19 @@ private:
     UPROPERTY(Transient)
     TObjectPtr<class UMaterialInterface> StoneMaterialAsset;
 
+    UPROPERTY(Transient)
+    TObjectPtr<class USoundBase> IntercomStingerSound;
+
+    UPROPERTY(Transient)
+    TObjectPtr<class USoundBase> PressureStingerSound;
+
     float AtmospherePhase = 0.0f;
     int32 LastStyledLoop = INDEX_NONE;
+    int32 LastAudioPressureLevel = INDEX_NONE;
+    bool bWasIntercomActive = false;
 
     void ConfigureSurface(class UStaticMeshComponent* MeshComponent, const FVector& RelativeLocation, const FVector& RelativeScale, const FRotator& RelativeRotation = FRotator::ZeroRotator) const;
     void ApplyLoopMaterialVariation(int32 LoopNumber, int32 PressureLevel);
+    void PlayReactiveStinger(class USoundBase* Sound, const FVector& WorldLocation, float VolumeMultiplier, float PitchMultiplier) const;
     void RefreshAtmosphere(float DeltaSeconds);
 };
