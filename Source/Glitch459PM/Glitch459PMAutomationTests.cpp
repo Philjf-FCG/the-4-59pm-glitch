@@ -158,4 +158,55 @@ bool FGlitchFalseAnomalyReportTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGlitchDiscoveryDossierTest, "Project.Glitch459PM.Gameplay.DiscoveryDossier", TestFlags)
+
+bool FGlitchDiscoveryDossierTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = CreateAutomationWorld(*this);
+    AGlitch459PMGameMode* GameMode = SpawnInitializedGameMode(World, *this);
+    if (!GameMode)
+    {
+        return false;
+    }
+
+    GameMode->AutomationSetCurrentLoop(5);
+    TestTrue(TEXT("Breakroom should be available"), GameMode->AutomationSetCurrentRoom(TEXT("breakroom")));
+    TestTrue(TEXT("Breakroom door should be selectable"), GameMode->AutomationSetSelectedObjectById(TEXT("breakroom_door")));
+    GameMode->GetSelectedObjectDescriptionAndClue();
+
+    TestEqual(TEXT("Inspecting the breakroom door on loop 5 should unlock the service ladder"), GameMode->GetDiscoveredShortcutCount(), 1);
+    TestTrue(TEXT("Shortcut dossier should log the discovered service ladder"), GameMode->GetShortcutDossierText().Contains(TEXT("Service ladder to server room [LOGGED]")));
+
+    GameMode->AutomationSetCurrentLoop(6);
+    TestTrue(TEXT("Microwave should be selectable"), GameMode->AutomationSetSelectedObjectById(TEXT("microwave")));
+    GameMode->GetSelectedObjectDescriptionAndClue();
+
+    TestEqual(TEXT("Inspecting the microwave on loop 6 should recover the first memory fragment"), GameMode->GetCollectedFragmentCount(), 1);
+    TestTrue(TEXT("Fragment dossier should log the family dinner memory"), GameMode->GetFragmentDossierText().Contains(TEXT("Family dinner memory [LOGGED]")));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGlitchExitForecastTest, "Project.Glitch459PM.Gameplay.ExitForecast", TestFlags)
+
+bool FGlitchExitForecastTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = CreateAutomationWorld(*this);
+    AGlitch459PMGameMode* GameMode = SpawnInitializedGameMode(World, *this);
+    if (!GameMode)
+    {
+        return false;
+    }
+
+    TestTrue(TEXT("Initial forecast should report a blocked Saturday route"), GameMode->GetExitForecastText().Contains(TEXT("Saturday blocked")));
+
+    GameMode->AutomationSetProgressState(5, 8, 0);
+    TestTrue(TEXT("Saturday route should acknowledge missing memories once anomalies and tasks are satisfied"), GameMode->GetExitForecastText().Contains(TEXT("memory is incomplete")));
+
+    TestTrue(TEXT("Should be able to force the family dinner fragment"), GameMode->AutomationForceCollectFragment(TEXT("fragment_family_dinner")));
+    TestTrue(TEXT("Should be able to force the resignation fragment"), GameMode->AutomationForceCollectFragment(TEXT("fragment_resignation")));
+    TestTrue(TEXT("Should be able to force the Saturday fragment"), GameMode->AutomationForceCollectFragment(TEXT("fragment_weekend")));
+    TestTrue(TEXT("Full recovery should advertise the true Saturday ending"), GameMode->GetExitForecastText().Contains(TEXT("True Saturday available")));
+    return true;
+}
+
 #endif

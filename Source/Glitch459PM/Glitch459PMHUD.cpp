@@ -225,6 +225,9 @@ void AGlitch459PMHUD::DrawHUD()
     DrawClippedWrappedBlock(FString::Printf(TEXT("LOOP      | %d      STABILIZED | %d / %d"), GameMode->GetCurrentLoop(), GameMode->GetResolvedAnomalies(), GameMode->GetRequiredAnomalies()), PhosphorSecondary, X, Y, 0.95f, TextMaxWidth, 2.0f);
     DrawClippedWrappedBlock(FString::Printf(TEXT("STAGE     | %s    TASKS | %d    COMPLIANCE | %d"), *GameMode->GetNarrativeStageLabel(), GameMode->GetCompletedTaskCount(), GameMode->GetComplianceScore()), PhosphorSecondary, X, Y, 0.9f, TextMaxWidth, 2.0f);
     DrawClippedWrappedBlock(FString::Printf(TEXT("SHORTCUTS | %d    FRAGMENTS | %d/%d    PRESSURE | %d/5    T-%ds"), GameMode->GetDiscoveredShortcutCount(), GameMode->GetCollectedFragmentCount(), GameMode->GetRequiredFragmentCount(), GameMode->GetPressureLevel(), GameMode->GetSecondsRemaining()), PhosphorSecondary, X, Y, 0.9f, TextMaxWidth, 10.0f);
+    DrawClippedWrappedBlock(FString::Printf(TEXT("ROUTES    | %s"), *GameMode->GetShortcutDossierText()), PhosphorDim, X, Y, 0.82f, TextMaxWidth, 2.0f);
+    DrawClippedWrappedBlock(FString::Printf(TEXT("MEMORIES  | %s"), *GameMode->GetFragmentDossierText()), PhosphorDim, X, Y, 0.82f, TextMaxWidth, 2.0f);
+    DrawClippedWrappedBlock(FString::Printf(TEXT("EXIT PATH | %s"), *GameMode->GetExitForecastText()), PhosphorDim, X, Y, 0.82f, TextMaxWidth, 10.0f);
 
     DrawClippedWrappedBlock(FString::Printf(TEXT("INTERCOM  | %s"), GameMode->IsIntercomActiveThisLoop() ? TEXT("ACTIVE") : TEXT("QUIET")), PhosphorPrimary, X, Y, 0.95f, TextMaxWidth, 2.0f);
     DrawClippedWrappedBlock(FString::Printf(TEXT("PREMONITION > %s"), *GameMode->GetCurrentPremonition()), PhosphorDim, X, Y, 0.9f, TextMaxWidth, 2.0f);

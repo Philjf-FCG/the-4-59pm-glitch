@@ -53,6 +53,7 @@ The fallback environment now includes imported horror texture-pack materials on 
 8. Review the new loop-review line after every reset. It tells you whether you actually made progress before the clock snapped back.
 9. To reach the best ending, combine anomaly stabilization, task progress, and all memory fragments before taking the lobby exit.
 10. Recent anomalies and tasks are rotated to avoid immediate repetition, so later loops should expose more of the office before the cycle repeats.
+11. Watch the route dossier lines on the HUD and terminal. They tell you which shortcut or memory lead is still missing and whether the lobby exit is trending toward Saturday or promotion.
 
 ### Narrative Structure
 
@@ -78,6 +79,7 @@ The fallback environment now includes imported horror texture-pack materials on 
 - **Room-Specific Distortion**: pressure no longer escalates with only generic text; each room now mutates in its own way as the office destabilizes.
 - **Loop Review**: every reset now records what you achieved or missed, making failed loops easier to read and correct.
 - **Content Rotation**: anomalies cycle through the deck before repeating, and tasks avoid immediate back-to-back duplicates when alternatives exist.
+- **Route Dossier**: the HUD and terminal now keep a running ledger of shortcut leads, recovered memories, and which lobby-exit route your current progress is favoring.
 
 ### Controls (DefaultInput.ini)
 

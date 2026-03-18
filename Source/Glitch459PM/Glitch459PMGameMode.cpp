@@ -118,6 +118,7 @@ void AGlitch459PMGameMode::SeedNarrativeData()
     Rooms.Empty();
     ObjectDescriptions.Empty();
     AnomalyDeck.Empty();
+    SeedDiscoveryNotes();
 
     {
         FGlitchRoom Room;
@@ -252,6 +253,21 @@ void AGlitch459PMGameMode::SeedNarrativeData()
         { TEXT("camera_eyelid"), TEXT("lobby"), TEXT("security_camera"), TEXT("The camera blinks. Not a light. An eyelid."), TEXT("Something is watching back."), EGlitchAnomalyClass::Surveillance },
         { TEXT("boss_shoes"), TEXT("ceo_office"), TEXT("intercom"), TEXT("Polished shoes stand beneath the bathroom stall in your reflection."), TEXT("The boss is always just out of frame."), EGlitchAnomalyClass::Intercom },
         { TEXT("archive_whisper"), TEXT("archive"), TEXT("clone_rows"), TEXT("The clones whisper your employee number in unison."), TEXT("They all clocked out. None left."), EGlitchAnomalyClass::Intercom }
+    };
+}
+
+void AGlitch459PMGameMode::SeedDiscoveryNotes()
+{
+    ShortcutNotes = {
+        { TEXT("shortcut_service_ladder"), TEXT("Service ladder to server room"), TEXT("Breakroom door on loop 5+") },
+        { TEXT("shortcut_fire_stair"), TEXT("Executive fire stair to CEO office"), TEXT("Lobby security camera on loop 8+") },
+        { TEXT("shortcut_archive_chute"), TEXT("Records chute to the Archive"), TEXT("Cubicle desk photo on loop 9+") }
+    };
+
+    FragmentNotes = {
+        { TEXT("fragment_family_dinner"), TEXT("Family dinner memory"), TEXT("Breakroom microwave on loop 6+") },
+        { TEXT("fragment_resignation"), TEXT("Unsent resignation memory"), TEXT("Server room backup tapes on loop 10+") },
+        { TEXT("fragment_weekend"), TEXT("Saturday morning memory"), TEXT("Archive quit box on loop 12+") }
     };
 }
 
@@ -652,6 +668,26 @@ FString AGlitch459PMGameMode::BuildRoomDistortionText(const FName& RoomId) const
     }
 
     return TEXT("");
+}
+
+FString AGlitch459PMGameMode::BuildDiscoveryLedger(const TArray<FGlitchDiscoveryNote>& Notes, const TSet<FName>& UnlockedSet) const
+{
+    TArray<FString> Entries;
+    Entries.Reserve(Notes.Num());
+
+    for (const FGlitchDiscoveryNote& Note : Notes)
+    {
+        if (UnlockedSet.Contains(Note.Id))
+        {
+            Entries.Add(FString::Printf(TEXT("%s [LOGGED]"), *Note.Label));
+        }
+        else
+        {
+            Entries.Add(FString::Printf(TEXT("%s [LEAD: %s]"), *Note.Label, *Note.Hint));
+        }
+    }
+
+    return Entries.Num() > 0 ? FString::Join(Entries, TEXT("; ")) : TEXT("No dossier entries.");
 }
 
 bool AGlitch459PMGameMode::TryUnlockShortcut(const FName& ShortcutId, const FString& DiscoveryMessage)
@@ -1078,7 +1114,8 @@ FString AGlitch459PMGameMode::GetTerminalStatusText() const
         ? TEXT("MEMORY RESTORED")
         : TEXT("MEMORY INCOMPLETE");
     const FString ReviewLine = LastLoopReview.IsEmpty() ? TEXT("NO PRIOR LOOP REVIEW") : LastLoopReview;
-    const FString TerminalFooter = FString::Printf(TEXT("%s\nLAST CALL: %s\n%s\n%s"), *CurrentDirectiveText, *IntercomLine, *OutcomeHint, *ReviewLine);
+    const FString DossierLine = FString::Printf(TEXT("ROUTES: %s\nMEMORIES: %s\nEXIT FORECAST: %s"), *GetShortcutDossierText(), *GetFragmentDossierText(), *GetExitForecastText());
+    const FString TerminalFooter = FString::Printf(TEXT("%s\nLAST CALL: %s\n%s\n%s\n%s"), *CurrentDirectiveText, *IntercomLine, *OutcomeHint, *ReviewLine, *DossierLine);
 
     return FString::Printf(
         TEXT("FINAL FRIDAY REPORT TERMINAL\nTIME %s\nLOOP %d\nPRESSURE %d/5\nANOMALIES %d/%d\nFRAGMENTS %d/%d\nINTERCOM %s\n%s\n%s"),
@@ -1093,6 +1130,74 @@ FString AGlitch459PMGameMode::GetTerminalStatusText() const
         *TaskLine,
         *TerminalFooter
     );
+}
+
+FString AGlitch459PMGameMode::GetShortcutDossierText() const
+{
+    return BuildDiscoveryLedger(ShortcutNotes, DiscoveredShortcuts);
+}
+
+FString AGlitch459PMGameMode::GetFragmentDossierText() const
+{
+    return BuildDiscoveryLedger(FragmentNotes, CollectedFragments);
+}
+
+FString AGlitch459PMGameMode::GetExitForecastText() const
+{
+    if (ResolvedAnomalies >= RequiredAnomalies && CompletedTaskCount >= 8 && CollectedFragments.Num() >= RequiredFragments)
+    {
+        return TEXT("True Saturday available through the lobby exit.");
+    }
+
+    if (ResolvedAnomalies >= RequiredAnomalies && CompletedTaskCount >= 8)
+    {
+        return TEXT("Saturday is reachable, but memory is incomplete.");
+    }
+
+    if (CompletedTaskCount >= 12 && ComplianceScore >= 4 && ResolvedAnomalies < RequiredAnomalies)
+    {
+        return TEXT("Promotion trap is primed if you keep obeying.");
+    }
+
+    TArray<FString> MissingSaturdayRequirements;
+    const int32 MissingAnomalies = FMath::Max(RequiredAnomalies - ResolvedAnomalies, 0);
+    const int32 MissingTasks = FMath::Max(8 - CompletedTaskCount, 0);
+    const int32 MissingFragments = FMath::Max(RequiredFragments - CollectedFragments.Num(), 0);
+
+    if (MissingAnomalies > 0)
+    {
+        MissingSaturdayRequirements.Add(FString::Printf(TEXT("%d anomalies"), MissingAnomalies));
+    }
+
+    if (MissingTasks > 0)
+    {
+        MissingSaturdayRequirements.Add(FString::Printf(TEXT("%d tasks"), MissingTasks));
+    }
+
+    if (MissingFragments > 0)
+    {
+        MissingSaturdayRequirements.Add(FString::Printf(TEXT("%d memories"), MissingFragments));
+    }
+
+    FString Forecast = MissingSaturdayRequirements.Num() > 0
+        ? FString::Printf(TEXT("Saturday blocked: need %s."), *FString::Join(MissingSaturdayRequirements, TEXT(", ")))
+        : TEXT("Lobby exit is reacting, but the route is still unstable.");
+
+    if (ResolvedAnomalies < RequiredAnomalies)
+    {
+        const int32 MissingPromotionTasks = FMath::Max(12 - CompletedTaskCount, 0);
+        const int32 MissingPromotionCompliance = FMath::Max(4 - ComplianceScore, 0);
+        if (MissingPromotionTasks == 0 && MissingPromotionCompliance == 0)
+        {
+            Forecast += TEXT(" Promotion route is already live if anomalies stay unresolved.");
+        }
+        else if (CompletedTaskCount >= 8)
+        {
+            Forecast += FString::Printf(TEXT(" Promotion route is watching for %d more tasks and %d more compliance."), MissingPromotionTasks, MissingPromotionCompliance);
+        }
+    }
+
+    return Forecast;
 }
 
 FString AGlitch459PMGameMode::GetSelectedObjectName() const
@@ -1227,6 +1332,30 @@ bool AGlitch459PMGameMode::AutomationSetCurrentAnomalyById(FName AnomalyId)
     }
 
     return false;
+}
+
+void AGlitch459PMGameMode::AutomationSetCurrentLoop(int32 LoopNumber)
+{
+    CurrentLoop = FMath::Max(1, LoopNumber);
+    BuildLoopTasks();
+    GenerateDirective();
+}
+
+void AGlitch459PMGameMode::AutomationSetProgressState(int32 NewResolvedAnomalies, int32 NewCompletedTasks, int32 NewComplianceScore)
+{
+    ResolvedAnomalies = FMath::Clamp(NewResolvedAnomalies, 0, RequiredAnomalies);
+    CompletedTaskCount = FMath::Max(NewCompletedTasks, 0);
+    ComplianceScore = NewComplianceScore;
+}
+
+bool AGlitch459PMGameMode::AutomationForceDiscoverShortcut(FName ShortcutId)
+{
+    return TryUnlockShortcut(ShortcutId, TEXT("Automation shortcut discovery."));
+}
+
+bool AGlitch459PMGameMode::AutomationForceCollectFragment(FName FragmentId)
+{
+    return TryCollectFragment(FragmentId, TEXT("Automation memory recovery."));
 }
 #endif
 

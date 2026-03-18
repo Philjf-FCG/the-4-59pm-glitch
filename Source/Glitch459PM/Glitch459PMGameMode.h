@@ -25,6 +25,13 @@ enum class EGlitchAnomalyClass : uint8
     Identity
 };
 
+struct FGlitchDiscoveryNote
+{
+    FName Id;
+    FString Label;
+    FString Hint;
+};
+
 USTRUCT()
 struct FGlitchExit
 {
@@ -189,6 +196,9 @@ public:
     FString GetCurrentPremonition() const { return CurrentPremonition; }
     FString GetCurrentDirective() const { return CurrentDirectiveText; }
     FString GetLastLoopReview() const { return LastLoopReview; }
+    FString GetShortcutDossierText() const;
+    FString GetFragmentDossierText() const;
+    FString GetExitForecastText() const;
     FString GetSelectedTaskPrompt() const;
     bool IsSelectedTaskCompleted() const;
 
@@ -210,6 +220,10 @@ public:
     bool AutomationSetCurrentRoom(FName RoomId);
     bool AutomationSetSelectedObjectById(FName ObjectId);
     bool AutomationSetCurrentAnomalyById(FName AnomalyId);
+    void AutomationSetCurrentLoop(int32 LoopNumber);
+    void AutomationSetProgressState(int32 NewResolvedAnomalies, int32 NewCompletedTasks, int32 NewComplianceScore);
+    bool AutomationForceDiscoverShortcut(FName ShortcutId);
+    bool AutomationForceCollectFragment(FName FragmentId);
     FName AutomationGetCurrentRoomId() const { return CurrentRoomId; }
     FName AutomationGetSelectedObjectId() const;
 #endif
@@ -245,6 +259,8 @@ private:
 
     FString BuildObjectDisplayName(const FName& ObjectId) const;
     FString BuildRoomDistortionText(const FName& RoomId) const;
+    FString BuildDiscoveryLedger(const TArray<FGlitchDiscoveryNote>& Notes, const TSet<FName>& UnlockedSet) const;
+    void SeedDiscoveryNotes();
 
     UPROPERTY()
     TMap<FName, FGlitchRoom> Rooms;
@@ -254,6 +270,10 @@ private:
 
     UPROPERTY()
     TArray<FGlitchAnomaly> AnomalyDeck;
+
+    TArray<FGlitchDiscoveryNote> ShortcutNotes;
+
+    TArray<FGlitchDiscoveryNote> FragmentNotes;
 
     UPROPERTY()
     TArray<FGlitchTask> MundaneTaskPool;
